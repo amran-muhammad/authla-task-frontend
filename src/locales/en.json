@@ -1,0 +1,55 @@
+{
+  "select-language": "Select Language",
+  "jobopening": {
+    "common": {
+      "required": "This value is required",
+      "maxLength": "Maximum {number} character",
+      "minLength": "Minimum {number} character"
+    },
+    "login": "I already have an account",
+    "signup": "Sign Up"
+  },
+  "jobapplication": {
+    "common": {
+      "required": "This value is required",
+      "maxLength": "Maximum {number} character",
+      "minLength": "Minimum {number} character"
+    },
+    "login": "I already have an account",
+    "signup": "Sign Up"
+  },
+  "auth": {
+    "title": "Join Us Now.",
+    "subtitle": "Start by creating your account",
+    "label": {
+      "promotional": "Receive promotional offers"
+    },
+    "action": {
+      "login": "I already have an account",
+      "signup": "Sign Up"
+    },
+    "placeholder": {
+      "name": "Name",
+      "email": "Email Address",
+      "password": "Password",
+      "passwordCheck": "Password Verification"
+    },
+    "errors": {
+      "name": {
+        "required": "Your name first name is required"
+      },
+      "email": {
+        "required": "Enter your email, it will be required to login",
+        "format": "Please, enter a valid email"
+      },
+      "password": {
+        "required": "Enter your password with at least 8 characters, it will be required to login",
+        "length": "The password should contain at least 8 characters"
+      },
+      "passwordCheck": {
+        "required": "Please, confirm your password",
+        "match": "The password does not match"
+      }
+    }
+  }
+}

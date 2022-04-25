@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useJobApplication } from '/@src/stores/jobApplication'
+import { useScheduleStore } from '/@src/stores/scheduleStore'
+
 import { useRouter } from 'vue-router'
 const router = useRouter()
-
-let job_application = useJobApplication()
+const scheduleStore = useScheduleStore()
 </script>
 <template>
   <VDropdown icon="feather:more-vertical" class="is-pushed-mobile" spaced right>
@@ -11,14 +11,14 @@ let job_application = useJobApplication()
       <a
         role="menuitem"
         class="dropdown-item is-media"
-        @click="job_application.gotoCompanyDetails"
+        @click="scheduleStore.bookingViewModal = true"
       >
         <div class="icon">
           <i aria-hidden="true" class="lnil lnil-eye"></i>
         </div>
         <div class="meta">
-          <span>View</span>
-          <span>View user details</span>
+          <span>Accept</span>
+          <span>Accept the application</span>
         </div>
       </a>
 
@@ -26,7 +26,7 @@ let job_application = useJobApplication()
 
       <a
         class="dropdown-item is-media"
-        @click="job_application.jobApplicationDeleteModal = true"
+        @click="scheduleStore.bookingDeleteModal = true"
       >
         <div class="icon">
           <i aria-hidden="true" class="lnil lnil-trash-can-alt"></i>

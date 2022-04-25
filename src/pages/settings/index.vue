@@ -4,13 +4,6 @@ meta:
 </route>
 <script setup lang="ts">
 import { defaultTheme } from '/@src/state/defaultLayoutState'
-import { useHead } from '@vueuse/head'
-import { pageTitle } from '/@src/state/sidebarLayoutState'
-
-pageTitle.value = 'Settings'
-useHead({
-  title: 'Settings',
-})
 </script>
 
 <template>

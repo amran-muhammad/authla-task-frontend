@@ -13,7 +13,7 @@ import { defaultTheme } from '/@src/state/defaultLayoutState'
     default-sidebar="dashboard"
   >
     <div class="page-content-inner">
-      <JobDashboard />
+      <TeacherDashboard />
     </div>
   </DefaultLayout>
 </template>

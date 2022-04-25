@@ -16,7 +16,6 @@ export default {
             return res;
         } catch (e) {
             console.log(e);
-            notyf.error('Looks like something went wrong')
             return e;
         }
     },
@@ -28,7 +27,6 @@ export default {
             return res;
         } catch (e) {
             console.log(e);
-            notyf.error('Looks like something went wrong')
             return e;
         }
     },
@@ -39,7 +37,6 @@ export default {
             return res;
         } catch (e) {
             console.log(e);
-            notyf.error('Looks like something went wrong')
             return e;
         }
     },
@@ -51,7 +48,6 @@ export default {
             return res;
         } catch (e) {
             console.log(e);
-            notyf.error('Looks like something went wrong')
             return e;
         }
     }

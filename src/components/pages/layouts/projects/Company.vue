@@ -240,22 +240,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div v-else class="empty">
-      <img
-        src="/@src/assets/parts/hero.png"
-        alt="3d design - man searching for candidates job profiles business - tenrol.com recruitment solution"
-      />
-      <p>There are no jobs open at the moment</p>
-    </div>
-
-    <a href="/" target="_blank">
-      <div class="poweredby m-t-100">
-        <img
-          src="/@src/assets/Tenrol-Logo-04.svg"
-          alt="Tenrol logo main - tenrol.com recruitment solution"
-        />
-      </div>
-    </a>
   </div>
 </template>
 

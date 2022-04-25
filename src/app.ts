@@ -102,7 +102,7 @@ export async function createApp({ enhanceApp }: VueroAppOptions) {
           h(RouterView, null, {
             default: defaultSlot,
           }),
-          h(VReloadPrompt, { appName: 'Tenrol' }),
+          h(VReloadPrompt, { appName: 'Appointment' }),
         ]
       }
     },

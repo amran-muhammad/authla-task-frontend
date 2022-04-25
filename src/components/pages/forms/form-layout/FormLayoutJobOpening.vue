@@ -858,7 +858,7 @@ const handleForm = async (values: typeof schema) => {
                                 class="is-danger"
                                 >Maximum
                                 {{ company.extra_data.screening_question_slot }}
-                                questions can be added! To add more try Tenrol
+                                questions can be added! To add more try
                                 premium.</VMessage
                               >
                             </div>
@@ -989,7 +989,7 @@ const handleForm = async (values: typeof schema) => {
                                 >Maximum
                                 {{ company.extra_data.video_question_slot }}
                                 video questions can be added! To add more try
-                                Tenrol premium.</VMessage
+                                premium.</VMessage
                               >
                             </div>
                           </div>

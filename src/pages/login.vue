@@ -9,6 +9,7 @@ import useNotyf from '/@src/composable/useNotyf'
 import sleep from '/@src/utils/sleep'
 import axios from 'axios'
 import { useCompany } from '/@src/stores/company'
+import { useUserStore } from '../stores/userStore'
 const host = import.meta.env.VITE_API_BASE_URL
 
 type StepId = 'login' | 'forgot-password' | 'reset-password' | 'remember-token'
@@ -20,13 +21,10 @@ const notif = useNotyf()
 const userSession = useUserSession()
 const redirect = route.query.redirect as string
 const company: any = useCompany()
+const userStore: any = useUserStore()
 const form_data = {
-  username: '',
+  email: '',
   password: '',
-  grant_type: 'password',
-  client_id: '2',
-  client_secret: 'qpcbKofTp1PREq7CTAUseOsQcw8jUJCgzNeUjiN3', //local
-  // client_secret: 'RMKHw2q7jEVMpUrP3KngbF0PJyxQaJyGQITozno0', //live
 }
 const email_form = {
   email: '',
@@ -135,7 +133,7 @@ const tokenCheck = async () => {
 const handleLogin = async () => {
   isLoading.value = true
   try {
-    if (form_data.username == '') {
+    if (form_data.email == '') {
       isLoading.value = false
       return notif.error('Enter Email First')
     } else if (form_data.password == '') {
@@ -143,12 +141,12 @@ const handleLogin = async () => {
       return notif.error('Enter Password First')
     }
 
-    let res: any = await axios.post(host + '/oauth/token', form_data)
+    let res: any = await axios.post(host + '/users/get-token', form_data)
     if (res.status == 200) {
-      let response: any = await userSession.setToken(res.data.access_token)
+      let response: any = await userSession.setToken(res.data.token)
       if (response == true) {
         isLoading.value = false
-        notif.success('Welcome back, ' + company.data.name)
+        notif.success('Welcome back, ' + userStore.userData.name)
         if (redirect) {
           router.push(redirect)
         } else {
@@ -164,30 +162,9 @@ const handleLogin = async () => {
     }
   } catch (error) {
     isLoading.value = false
-    let email_check: any = await axios.post(
-      host + '/company/v1/email-checker',
-      {
-        email: form_data.username,
-        type: 'user',
-      }
-    )
-    if (email_check.status == 200) {
-      if (email_check.data.email == false) {
-        if (email_check.data.msg) {
-          notif.error(email_check.data.msg)
-        } else {
-          notif.error('Incorrect Password Entered!')
-        }
-      } else {
-        notif.error('Incorrect Email Entered!')
-      }
-    }
+    notif.error('ID is not approved yet!')
   }
 }
-
-useHead({
-  title: 'Tenrol - Sign in',
-})
 </script>
 
 <template>
@@ -203,7 +180,7 @@ useHead({
                 <div class="column">
                   <img
                     class="hero-image"
-                    src="/@src/assets/illustrations/login/login.png"
+                    src="/@src/assets/illustrations/login/station.svg"
                     alt=""
                   />
                 </div>
@@ -242,7 +219,7 @@ useHead({
             >
               <div class="control has-validation">
                 <input
-                  v-model="form_data.username"
+                  v-model="form_data.email"
                   type="text"
                   name="email"
                   class="input"
@@ -304,7 +281,7 @@ useHead({
                   class="help p-t-5"
                   label="Show Password"
                 /> -->
-                <a @click="step = 'forgot-password'">Forgot Password?</a>
+                <!-- <a @click="step = 'forgot-password'">Forgot Password?</a> -->
               </div>
               <div class="button-wrap has-help">
                 <VButton

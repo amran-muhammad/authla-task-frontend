@@ -6,9 +6,11 @@ import { useI18n } from 'vue-i18n'
 import { Form, Field } from 'vee-validate'
 
 import { useCompany } from '/@src/stores/company'
+import { useUserStore } from '/@src/stores/userStore'
 import * as yup from 'yup'
 import { Notyf } from 'notyf'
 import common from '../stores/action/common'
+import { step } from 'billboard.js'
 const notyf = new Notyf()
 
 const { t } = useI18n()
@@ -18,26 +20,10 @@ const schema = yup.object({
     .string()
     .required(t('Full Name is required'))
     .min(5, t('Full Name must contain 5 characters')),
-  description: yup
-    .string()
-    .required(t('Company Description is required'))
-    .min(50, t('Company Description must be at least 50 characters.'))
-    .max(160, t('Company Description can be maximum 160 characters')),
-  cname: yup
-    .string()
-    .required(t('Company Name is required'))
-    .min(2, t('Company Description must be at least 2 characters.')),
-  industry: yup.string().required(t('Industry Name is required')),
-  address: yup.string().required(t('Company Location is required')),
-  phone: yup.string().required(t('Phone number is required')),
   email: yup
     .string()
     .required(t('auth.errors.email.required'))
     .email(t('auth.errors.email.format')),
-  cemail: yup
-    .string()
-    .required(t('Company email is required'))
-    .email(t('Please, enter a valid email')),
   password: yup
     .string()
     .required(t('auth.errors.password.required'))
@@ -50,13 +36,8 @@ const schema = yup.object({
 
 const route = useRoute()
 const router = useRouter()
-const company = useCompany()
+const userStore = useUserStore()
 
-const previousStep = () => {
-  if (company.step > 1) {
-    company.setStep(company.step - 1)
-  }
-}
 function ValidateEmail(mail: string) {
   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
     return true
@@ -64,145 +45,37 @@ function ValidateEmail(mail: string) {
   return false
 }
 
-const validateStep = async () => {
-  if (company.step == 1) {
-    if (company.data.name.trim() == '') {
-      return
-    } else if (company.extra_data.phone == '') {
-      return
-    } else if (!ValidateEmail(company.data.email)) {
-      return
-    } else if (company.data.email.trim() == '') {
-      return
-    } else if (company.data.password.trim() == '') {
-      return
-    } else if (company.pchek.trim() == '') {
-      return
-    } else if (company.pchek.length < 8) {
-      return
-    } else if (company.data.password.length < 8) {
-      return
-    } else if (company.data.password != company.pchek) {
-      return
-    }
-    let email: any = await common.postApi('company/v1/email-checker', {
-      email: company.data.email,
-      type: 'user',
-    })
-
-    if (email.data.email == false) {
-      return notyf.error('This email is already used!')
-    }
-    company.setStep(company.step + 1)
-  } else if (company.step == 2) {
-    if (
-      company.extra_data.name.trim() == '' ||
-      company.extra_data.name.trim().length < 2
-    ) {
-      return
-    } else if (company.extra_data.email.trim() == '') {
-      return
-    } else if (!ValidateEmail(company.extra_data.email)) {
-      return
-    } else if (company.extra_data.description.trim() == '') {
-      return
-    } else if (
-      company.extra_data.description.trim().length > 160 ||
-      company.extra_data.description.trim().length < 50
-    ) {
-      return
-    } else if (company.extra_data.industry.trim() == '') {
-      return
-    }
-    let email2: any = await common.postApi('company/v1/email-checker', {
-      email: company.extra_data.email,
-      type: 'company',
-    })
-
-    if (email2.data.email == false) {
-      return notyf.error('This email is already used!')
-    }
-    company.setStep(company.step + 1)
-  } else if (company.step == 3) {
-    if (company.extra_data.country.trim() == '') {
-      return
-    } else if (company.extra_data.address.trim() == '') {
-      return
-    }
-    company.setStep(company.step + 1)
-  } else if (company.step < 4) {
-    company.setStep(company.step + 1)
-  } else if (company.step === 4) {
-    if (company.data.name.trim() == '') {
-      return notyf.error('Personal name is required!')
-    } else if (company.extra_data.phone == '') {
-      return notyf.error('Personal phone is required!')
-    } else if (company.data.email.trim() == '') {
-      return notyf.error('Personal email is required!')
-    } else if (company.data.password.trim() == '') {
-      return notyf.error('Password is required!')
-    } else if (company.extra_data.name.trim() == '') {
-      return notyf.error('Company name is required!')
-    } else if (company.extra_data.email.trim() == '') {
-      return notyf.error('Company email is required!')
-    } else if (company.extra_data.description.trim() == '') {
-      return notyf.error('Company description is required!')
-    } else if (company.extra_data.description.trim() == '') {
-      return notyf.error('Company Description must be at least 50 characters.')
-    } else if (company.extra_data.country.trim() == '') {
-      return notyf.error('Company country is required!')
-    }
-
-    await company.save().then((data: any) => {
-      if (data == true) {
-        company.setStep(company.step + 1)
-      } else {
-        return
-      }
-    })
-  } else {
-    company.reset()
+const validateStep = () => {
+  if (userStore.step === 4) {
+    userStore.register()
+    userStore.setStep(userStore.step + 1)
+  } else if (userStore.step == 5) {
     router.push({
       name: 'login',
     })
+  } else {
+    userStore.setStep(userStore.step + 1)
   }
 }
-
-useHead({
-  title: `${company.stepTitle} - Tenrol`,
-})
-watch(
-  () => company.step,
-  () => {
-    router.push({
-      query: {
-        step: company.step,
-      },
-    })
-  }
-)
-watchEffect(() => {
-  const step = route.query.step as string
-  if (step) {
-    company.setStep(parseInt(step))
-  }
-})
+const previousStep = () => {
+  userStore.setStep(userStore.step - 1)
+}
 </script>
 
 <template>
   <MinimalLayout>
     <Form :validation-schema="schema" @submit.prevent="validateStep">
       <!--Wizard Navbar-->
-      <CompanyV1Navigation
-        v-model:step="company.step"
-        :title="company.stepTitle"
+      <UserNavigation
+        v-model:step="userStore.step"
+        :title="userStore.stepTitle"
       />
 
       <!--Wizard Progress Bar-->
       <progress
         id="wizard-progress"
         class="progress is-smaller is-primary wizard-progress"
-        :value="(company.step / 5) * 100"
+        :value="(userStore.step / 5) * 100"
         max="100"
       ></progress>
 
@@ -211,65 +84,65 @@ watchEffect(() => {
         <div
           id="wizard-step-0"
           class="inner-wrapper"
-          :class="[company.step === 1 && 'is-active']"
+          :class="[userStore.step === 1 && 'is-active']"
         >
-          <CompanyV1Step1 @next="company.setStep(2)" />
+          <UserStep1 />
         </div>
 
         <div
           id="wizard-step-1"
           class="inner-wrapper"
-          :class="[company.step === 2 && 'is-active']"
+          :class="[userStore.step === 2 && 'is-active']"
         >
-          <CompanyV1Step2 @next="company.setStep(3)" />
+          <UserStep2 @next="userStore.setStep(3)" />
         </div>
-        <!-- @prev="company.setStep(1)" -->
+        <!-- @prev="userStore.setStep(1)" -->
 
         <div
           id="wizard-step-2"
           class="inner-wrapper"
-          :class="[company.step === 3 && 'is-active']"
+          :class="[userStore.step === 3 && 'is-active']"
         >
-          <CompanyV1Step3
-            @next="company.setStep(4)"
-            @prev="company.setStep(2)"
+          <UserStep3
+            @next="userStore.setStep(4)"
+            @prev="userStore.setStep(2)"
           />
         </div>
 
         <div
           id="wizard-step-3"
           class="inner-wrapper"
-          :class="[company.step === 4 && 'is-active']"
+          :class="[userStore.step === 4 && 'is-active']"
         >
-          <CompanyV1Step4
-            @next="company.setStep(5)"
-            @prev="company.setStep(3)"
+          <UserStep4
+            @next="userStore.setStep(5)"
+            @prev="userStore.setStep(3)"
           />
         </div>
 
         <div
           id="wizard-step-4"
           class="inner-wrapper"
-          :class="[company.step === 5 && 'is-active']"
+          :class="[userStore.step === 5 && 'is-active']"
           data-step-title="Finish"
         >
-          <CompanyV1Step5
-            @next="company.setStep(6)"
-            @prev="company.setStep(4)"
+          <UserStep5
+            @next="userStore.setStep(6)"
+            @prev="userStore.setStep(4)"
           />
         </div>
 
         <!--Wizard Navigation Buttons-->
         <div
           class="wizard-buttons"
-          :class="[company.step > 0 && company.step < 6 && 'is-active']"
+          :class="[userStore.step > 1 && userStore.step < 6 && 'is-active']"
         >
           <div class="wizard-buttons-inner">
             <button
-              v-if="company.step > 1 && company.step < 5"
+              v-if="userStore.step < 5"
               :class="[
-                company.step === 2 && 'is-light',
-                company.step > 2 && 'is-primary is-elevated',
+                userStore.step === 2 && 'is-light',
+                userStore.step > 2 && 'is-primary is-elevated',
               ]"
               class="button v-button is-bold wizard-button-previous"
               @click="previousStep"
@@ -277,17 +150,18 @@ watchEffect(() => {
               Previous
             </button>
             <button
+              v-if="userStore.step > 1"
               :class="[
-                company.step === 4 && 'is-light',
-                company.step < 6 && 'is-primary is-elevated',
+                userStore.step === 4 && 'is-light',
+                userStore.step < 6 && 'is-primary is-elevated',
               ]"
               class="button v-button is-bold wizard-button-next"
               @click="validateStep"
             >
               {{
-                company.step === 4
-                  ? 'Validate'
-                  : company.step === 5
+                userStore.step === 4
+                  ? 'Complete'
+                  : userStore.step === 5
                   ? 'Sign in'
                   : 'Next'
               }}

@@ -226,8 +226,8 @@ export default defineConfig({
         'apple-icon.png',
       ],
       manifest: {
-        name: 'Tenrol - The future of hiring',
-        short_name: 'Tenrol',
+        name: 'Appointment',
+        short_name: 'Appointment',
         start_url: '/?utm_source=pwa',
         display: 'standalone',
         theme_color: '#ffffff',

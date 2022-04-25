@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import useNotyf from '/@src/composable/useNotyf'
 import { useCompany } from '/@src/stores/company'
+import { useUserStore } from '/@src/stores/userStore'
 import { useI18n } from 'vue-i18n'
 import { Form, Field } from 'vee-validate'
 import { useCountryMobile } from '/@src/assets/countrymobile.json'
@@ -29,6 +30,7 @@ const schema = yup.object({
 })
 const notyf = useNotyf()
 const company = useCompany()
+const userStore = useUserStore()
 function showPassword() {
   let x: any = document.getElementById('_id_show_password')
   let icon_eye: any = document.getElementById('icon_eye')
@@ -63,7 +65,7 @@ function showPassword() {
                   :has-error="Boolean(errorMessage)"
                 >
                   <input
-                    v-model="company.data.name"
+                    v-model="userStore.userData.name"
                     v-bind="field"
                     class="input"
                     type="text"
@@ -87,7 +89,7 @@ function showPassword() {
                   :has-error="Boolean(errorMessage)"
                 >
                   <input
-                    v-model="company.data.email"
+                    v-model="userStore.userData.email"
                     v-bind="field"
                     class="input"
                     type="text"
@@ -110,7 +112,7 @@ function showPassword() {
                   :has-error="Boolean(errorMessage)"
                 >
                   <input
-                    v-model="company.data.password"
+                    v-model="userStore.userData.password"
                     v-bind="field"
                     class="input"
                     type="password"
@@ -140,7 +142,7 @@ function showPassword() {
                   :has-error="Boolean(errorMessage)"
                 >
                   <input
-                    v-model="company.pchek"
+                    v-model="userStore.pchek"
                     v-bind="field"
                     class="input"
                     type="password"

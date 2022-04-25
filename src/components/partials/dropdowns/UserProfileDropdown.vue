@@ -1,29 +1,19 @@
 <script setup lang="ts">
 import { useCompany } from '/@src/stores/company'
 import { useUserSession } from '/@src/stores/userSession'
+import { useUserStore } from '/@src/stores/userStore'
 const host = import.meta.env.VITE_API_BASE_URL
 const company = useCompany()
 const user = useUserSession()
+const userStore = useUserStore()
 </script>
 <template>
   <VDropdown right spaced class="user-dropdown profile-dropdown">
-    <template #button="{ toggle }">
-      <a
-        class="is-trigger dropdown-trigger"
-        aria-haspopup="true"
-        @click="toggle"
-      >
-        <VAvatar :picture="host + company.data.avatar" />
-      </a>
-    </template>
-
     <template #content>
       <div class="dropdown-head">
-        <VAvatar size="large" :picture="host + company.extra_data.logo" />
-
         <div class="meta">
-          <span>{{ company.extra_data.name }}</span>
-          <span>{{ company.data.name }}</span>
+          <span>{{ userStore.userData.name }}</span>
+          <span>{{ userStore.userData.name }}</span>
         </div>
       </div>
 
@@ -32,9 +22,7 @@ const user = useUserSession()
         role="menuitem"
         class="dropdown-item is-media"
       >
-        <div class="icon">
-          <VAvatar size="small" :picture="host + company.data.avatar" />
-        </div>
+        <div class="icon"></div>
         <div class="meta">
           <span>Profile</span>
           <span>View your profile</span>

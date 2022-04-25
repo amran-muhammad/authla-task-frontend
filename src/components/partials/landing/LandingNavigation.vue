@@ -62,21 +62,6 @@ watchEffect(() => {
             <span :style="isDark ? 'color:#fff' : ''">Home</span>
           </RouterLink>
         </div>
-        <div class="navbar-item">
-          <RouterLink :to="{ name: 'pricing' }" class="nav-link is-scroll">
-            <span :style="isDark ? 'color:#fff' : ''">Pricing</span>
-          </RouterLink>
-        </div>
-        <div class="navbar-item">
-          <RouterLink :to="{ name: 'contact-us' }" class="nav-link is-scroll">
-            <span :style="isDark ? 'color:#fff' : ''"> Contact Us </span>
-          </RouterLink>
-        </div>
-        <div class="navbar-item">
-          <RouterLink :to="{ name: 'about-us' }" class="nav-link is-scroll">
-            <span :style="isDark ? 'color:#fff' : ''">About Us</span>
-          </RouterLink>
-        </div>
       </div>
 
       <div class="navbar-end">

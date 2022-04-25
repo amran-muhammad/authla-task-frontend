@@ -7,6 +7,7 @@ import { isDark } from '../state/darkModeState'
 import { Notyf } from 'notyf'
 import { customersOptions } from '/@src/data/dashboards/personal-v1/customersChart'
 import axios from 'axios'
+import { useUserStore } from './userStore'
 
 export type UserData = Record<string, any> | null
 
@@ -25,6 +26,7 @@ export const useUserSession = defineStore('userSession', () => {
   const days = useStorage('days', [])
   const applications = useStorage('applications', [])
   const host = import.meta.env.VITE_API_BASE_URL
+  const userStore = useUserStore()
 
   const isLoggedIn = computed(
     () => token.value !== undefined && token.value !== ''
@@ -101,17 +103,15 @@ export const useUserSession = defineStore('userSession', () => {
       Authorization: 'Bearer ' + token,
     }
     const res_user: any = await axios.get(
-      host + '/api/company/v1/read',
+      host + '/users/get-user-by-token',
       { headers: headers }
     )
-    if (res_user.status == 200 && res_user.data.success == true) {
-      company.data.id = res_user.data.data.id
-      company.data.email = res_user.data.data.email
-      company.data.name = res_user.data.data.name
-      company.data.type = res_user.data.data.type
-      company.data.avatar = res_user.data.data.avatar
-      company.data_stats = res_user.data.data_stats
-      await getChartData(token)
+    if (res_user.status == 200) {
+      userStore.userData.id = res_user.data.user._id
+      userStore.userData.email = res_user.data.user.email
+      userStore.userData.name = res_user.data.user.name
+      userStore.userData.type = res_user.data.user.type
+      userStore.userData.studentID = res_user.data.user.studentID
       return true
     } else {
       notyf.error(res_user.data.msg)
@@ -124,15 +124,12 @@ export const useUserSession = defineStore('userSession', () => {
       Authorization: 'Bearer ' + token.value,
     }
     try {
-      
-
       const res_com:any = await common.postApi(
         'api/company/v1/update',
         { data: company.data }
         
       )
       if (res_com.status == 200) {
-        company.editPhoneChange()
         return true
       } else {
         return false

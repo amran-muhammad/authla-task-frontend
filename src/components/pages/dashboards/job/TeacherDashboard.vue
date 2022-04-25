@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import hrQuote from '/@src/data/landing/hr-quote.json'
 import { useScheduleStore } from '/@src/stores/scheduleStore'
 
@@ -9,14 +9,89 @@ import { useUserStore } from '/@src/stores/userStore'
 const random = Math.floor(Math.random() * 101)
 const quotes = hrQuote
 const scheduleStore = useScheduleStore()
-const userStore = useUserStore()
+const userStore: any = useUserStore()
+let userDeactivateModal = ref(false)
+let userActivateModal = ref(false)
+let userEditModal = ref(false)
+let id = ref('')
+let index = ref(-1)
+function makeReadyForUpdateStatusActive(obj: any, indexinput: number) {
+  id.value = obj._id
+  index.value = indexinput
+  userActivateModal.value = true
+}
+function makeReadyForUpdateStatusDeactive(obj: any, indexinput: number) {
+  id.value = obj._id
+  index.value = indexinput
+  userDeactivateModal.value = true
+}
+function deactivateUser() {
+  userStore.statusUpdateOfUserDeactive(id.value)
+  userDeactivateModal.value = false
+  userStore.teacher.value[index.value].status = 'Pending'
+  //   console.log(userStore.teacher.value[index.value].status)
+}
+function activateUser() {
+  userStore.statusUpdateOfUserActive(id.value)
+  userActivateModal.value = false
+  userStore.teacher.value[index.value].status = 'Approved'
+  //   console.log(userStore.teacher.value[index.value].status)
+}
 onMounted(() => {
-  scheduleStore.getAllCommonSchedules()
+  userStore.getAllTeacher()
 })
 </script>
 
 <template>
   <div class="lifestyle-dashboard lifestyle-dashboard-v4">
+    <VModal
+      :open="userEditModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="userEditModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Deactivate the teacher?"
+        />
+      </template>
+      <template #action>
+        <VButton @click="userEditModal = false" raised>Confirm</VButton>
+      </template>
+    </VModal>
+    <VModal
+      :open="userDeactivateModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="userDeactivateModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Deactivate the teacher?"
+        />
+      </template>
+      <template #action>
+        <VButton @click="deactivateUser()" raised>Confirm</VButton>
+      </template>
+    </VModal>
+    <VModal
+      :open="userActivateModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="userActivateModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Approve the teacher?"
+        />
+      </template>
+      <template #action>
+        <VButton @click="deactivateUser()" raised>Confirm</VButton>
+      </template>
+    </VModal>
     <div class="columns">
       <div class="column is-8">
         <div class="columns is-multiline">
@@ -43,57 +118,39 @@ onMounted(() => {
             <p class="dark-inverted">
               {{ quotes[random].quote }}
             </p>
-            <p class="dark-inverted">
-              <b>- {{ quotes[random].writer }}</b>
-            </p>
           </div>
         </div>
       </div>
     </div>
 
     <VCard
-      v-for="(item, index) in scheduleStore.schedules"
+      v-for="(item, index) in userStore.teacher"
       :key="index"
       class="m-b-10"
     >
       <div>
-        <p>Teacher Name: {{ item.userDetails[0].name }}</p>
-        <p>Department Name: {{ item.userDetails[0].department }}</p>
-        <p>Course Name: {{ item.userDetails[0].course }}</p>
-        <p class="dark-inverted">
-          From
-          {{
-            item.start_time < 12
-              ? item.start_time + ' AM'
-              : (item.start_time - 12 == 0 ? 12 : item.start_time - 12) + ' PM'
-          }}
-          to
-          {{
-            item.end_time < 12
-              ? item.end_time + ' AM'
-              : (item.end_time - 12 == 0 ? 12 : item.end_time - 12) + ' PM'
-          }}
-        </p>
-        <p>Status: {{ item.status }}</p>
-        <VButtons>
-          <VButton
-            @click="
-              scheduleStore.bookSchedule(
-                item,
-                index,
-                userStore.userData.studentID
-              )
-            "
-            v-if="item.status == 'Open'"
-          >
-            Book Now
-          </VButton>
-          <VButton v-if="item.status == 'Pending'"> Pending </VButton>
-        </VButtons>
-        <!-- <p class="dark-inverted">
-          <b>- {{ quotes[random].writer }}</b>
-        </p> -->
+        <p>Student Name: {{ item.name }}</p>
+        <p>Email: {{ item.email }}</p>
+        <p>Course Name: {{ item.course }}</p>
+        <p>Department Name: {{ item.department }}</p>
       </div>
+      <VButtons>
+        <VButton
+          @click="makeReadyForUpdateStatusActive(item, index)"
+          color="info"
+          v-if="item.status == 'Pending'"
+        >
+          Approve
+        </VButton>
+        <VButton
+          @click="makeReadyForUpdateStatusDeactive(item, index)"
+          color="danger"
+          v-if="item.status == 'Approved'"
+        >
+          Deactivate
+        </VButton>
+        <VButton @click="userEditModal = true" color="primary"> Edit </VButton>
+      </VButtons>
     </VCard>
   </div>
 </template>

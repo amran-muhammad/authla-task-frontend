@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useWindowScroll } from '@vueuse/core'
 import { computed, ref } from 'vue'
-import { useCompany } from '/@src/stores/company'
+import { useUserStore } from '/@src/stores/userStore'
 
 import useNotyf from '/@src/composable/useNotyf'
 import sleep from '/@src/utils/sleep'
@@ -13,7 +13,7 @@ const host = import.meta.env.VITE_API_BASE_URL
 
 const allcountries = useCountryMobile
 
-const company = useCompany()
+const userStore = useUserStore()
 const isUploading = ref(false)
 const isLoading = ref(false)
 
@@ -34,20 +34,8 @@ function ValidateEmail(mail: string) {
   return false
 }
 
-const onSave = async () => {
+const onSave = () => {
   isLoading.value = true
-  if (!ValidateEmail(company.data.email)) {
-    isLoading.value = false
-    return notyf.error('Incorrect personal email format!')
-  }
-  let result = await userSession.updateProfile(company.editPhone)
-  if (result == true) {
-    notyf.success('Your changes have been successfully saved!')
-    isLoading.value = false
-  } else {
-    notyf.error('Sorry, update process is failed!')
-    isLoading.value = false
-  }
 }
 </script>
 
@@ -96,7 +84,7 @@ const onSave = async () => {
               <label>Full Name</label>
               <VControl icon="feather:user">
                 <input
-                  v-model="company.data.name"
+                  v-model="userStore.userData.name"
                   type="text"
                   class="input"
                   placeholder="Full Name"
@@ -111,7 +99,7 @@ const onSave = async () => {
               <label>Email</label>
               <VControl icon="feather:mail">
                 <input
-                  v-model="company.data.email"
+                  v-model="userStore.userData.email"
                   type="text"
                   class="input"
                   placeholder="Email"

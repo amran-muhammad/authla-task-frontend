@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 import useDropdown from '/@src/composable/useDropdown'
 import { useCompany } from '/@src/stores/company'
+import { useUserStore } from '/@src/stores/userStore'
 import { isDark, toggleDarkModeHandler } from '/@src/state/darkModeState'
 import { useViaPlaceholderError } from '/@src/composable/useViaPlaceholderError'
 import { useRouter } from 'vue-router'
@@ -18,6 +19,7 @@ const dropdown2 = useDropdown(dropdownElement2)
 const company = useCompany()
 const router = useRouter()
 const user = useUserSession()
+const userStore = useUserStore()
 const setStep = (target: number) => {
   if (company.step >= target) {
     company.setStep(target)
@@ -44,7 +46,7 @@ const goToCompanyView = () => {
 
     <div class="navbar-item is-wizard-title" @click="dropdown1.toggle">
       <span class="title-wrap">
-        Step {{ company.step }}: <span>{{ company.stepTitle }}</span>
+        Step {{ userStore.step }}: <span>{{ userStore.stepTitle }}</span>
       </span>
     </div>
 
@@ -112,14 +114,7 @@ const goToCompanyView = () => {
       class="dropdown is-right dropdown-trigger user-dropdown"
     >
       <div class="is-trigger" aria-haspopup="true" @click="dropdown2.toggle">
-        <div class="profile-avatar">
-          <img
-            class="avatar"
-            :src="host + company.data.avatar"
-            alt="/images/avatars/svg/vuero-1.svg"
-            @error.once="(event) => useViaPlaceholderError(event, '150x150')"
-          />
-        </div>
+        <div class="profile-avatar"></div>
         <i
           aria-hidden="true"
           class="iconify"
@@ -129,7 +124,7 @@ const goToCompanyView = () => {
       <div class="dropdown-menu" role="menu">
         <div class="dropdown-content">
           <div class="dropdown-item">
-            <p class="is-size-7 dark-inverted">{{ company.data.name }}</p>
+            <p class="is-size-7 dark-inverted">{{ userStore.userData.name }}</p>
           </div>
           <a class="dropdown-item">
             <i aria-hidden="true" class="iconify" data-icon="feather:user"></i>

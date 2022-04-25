@@ -10,10 +10,11 @@ import { defaultTheme } from '/@src/state/defaultLayoutState'
   <DefaultLayout
     :theme="defaultTheme"
     open-on-mounted
-    default-sidebar="dashboard"
+    default-sidebar="elements"
   >
+    <!-- Content Wrapper -->
     <div class="page-content-inner">
-      <JobDashboard />
+      <DataListJobOpening />
     </div>
   </DefaultLayout>
 </template>

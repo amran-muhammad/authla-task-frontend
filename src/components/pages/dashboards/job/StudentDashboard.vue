@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import hrQuote from '/@src/data/landing/hr-quote.json'
 import { useScheduleStore } from '/@src/stores/scheduleStore'
 
@@ -9,14 +9,77 @@ import { useUserStore } from '/@src/stores/userStore'
 const random = Math.floor(Math.random() * 101)
 const quotes = hrQuote
 const scheduleStore = useScheduleStore()
-const userStore = useUserStore()
+const userStore: any = useUserStore()
+let id = ref('')
+function makeReadyForUpdateStatusActive(obj: any) {
+  id.value = obj._id
+  userStore.userActivateModal = true
+}
+function makeReadyForUpdateStatusDeactive(obj: any) {
+  id.value = obj._id
+  userStore.userDeactivateModal = true
+}
 onMounted(() => {
-  scheduleStore.getAllCommonSchedules()
+  userStore.getAllStudent()
 })
 </script>
 
 <template>
   <div class="lifestyle-dashboard lifestyle-dashboard-v4">
+    <VModal
+      :open="userStore.userEditModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="userStore.userEditModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Deactivate the student?"
+        />
+      </template>
+      <template #action>
+        <VButton @click="userStore.userEditModal = false" raised
+          >Confirm</VButton
+        >
+      </template>
+    </VModal>
+    <VModal
+      :open="userStore.userDeactivateModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="userStore.userDeactivateModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Deactivate the student?"
+        />
+      </template>
+      <template #action>
+        <VButton @click="userStore.statusUpdateOfUserDeactive(id)" raised
+          >Confirm</VButton
+        >
+      </template>
+    </VModal>
+    <VModal
+      :open="userStore.userActivateModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="userStore.userActivateModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Approve the student?"
+        />
+      </template>
+      <template #action>
+        <VButton @click="userStore.statusUpdateOfUserActive(id)" raised
+          >Confirm</VButton
+        >
+      </template>
+    </VModal>
     <div class="columns">
       <div class="column is-8">
         <div class="columns is-multiline">
@@ -52,48 +115,35 @@ onMounted(() => {
     </div>
 
     <VCard
-      v-for="(item, index) in scheduleStore.schedules"
+      v-for="(item, index) in userStore.student"
       :key="index"
       class="m-b-10"
     >
       <div>
-        <p>Teacher Name: {{ item.userDetails[0].name }}</p>
-        <p>Department Name: {{ item.userDetails[0].department }}</p>
-        <p>Course Name: {{ item.userDetails[0].course }}</p>
-        <p class="dark-inverted">
-          From
-          {{
-            item.start_time < 12
-              ? item.start_time + ' AM'
-              : (item.start_time - 12 == 0 ? 12 : item.start_time - 12) + ' PM'
-          }}
-          to
-          {{
-            item.end_time < 12
-              ? item.end_time + ' AM'
-              : (item.end_time - 12 == 0 ? 12 : item.end_time - 12) + ' PM'
-          }}
-        </p>
-        <p>Status: {{ item.status }}</p>
-        <VButtons>
-          <VButton
-            @click="
-              scheduleStore.bookSchedule(
-                item,
-                index,
-                userStore.userData.studentID
-              )
-            "
-            v-if="item.status == 'Open'"
-          >
-            Book Now
-          </VButton>
-          <VButton v-if="item.status == 'Pending'"> Pending </VButton>
-        </VButtons>
-        <!-- <p class="dark-inverted">
-          <b>- {{ quotes[random].writer }}</b>
-        </p> -->
+        <p>Student Name: {{ item.name }}</p>
+        <p>Student ID: {{ item.studentID }}</p>
+        <p>Email: {{ item.email }}</p>
+        <p>Department Name: {{ item.department }}</p>
       </div>
+      <VButtons>
+        <VButton
+          @click="makeReadyForUpdateStatusActive(item)"
+          color="info"
+          v-if="item.status == 'Pending'"
+        >
+          Approve
+        </VButton>
+        <VButton
+          @click="makeReadyForUpdateStatusDeactive(item)"
+          color="danger"
+          v-if="item.status == 'Approved'"
+        >
+          Deactivate
+        </VButton>
+        <VButton @click="userStore.userEditModal = true" color="primary">
+          Edit
+        </VButton>
+      </VButtons>
     </VCard>
   </div>
 </template>

@@ -12,9 +12,9 @@ pageTitle.value = 'Tenrol'
 useHead({
   title: 'Tenrol - Company',
 })
-import { useCompany } from '/@src/stores/company'
+import { useUserStore } from '/@src/stores/userStore'
 const host = import.meta.env.VITE_API_BASE_URL
-const company = useCompany()
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -32,17 +32,11 @@ const company = useCompany()
             <div class="column is-4">
               <div class="account-box is-navigation">
                 <VBlock
-                  :title="company.extra_data.name"
-                  :subtitle="company.data.name"
+                  :title="userStore.userData.name"
+                  :subtitle="userStore.userData.name"
                   center
                 >
-                  <template #icon>
-                    <VAvatar
-                      size="large"
-                      :picture="host + company.extra_data.logo"
-                    />
-                    <!-- badge="/images/icons/flags/united-states-of-america.svg" -->
-                  </template>
+                  <template #icon> </template>
                 </VBlock>
 
                 <div class="account-menu">
@@ -57,16 +51,6 @@ const company = useCompany()
                     </span>
                   </RouterLink>
 
-                  <RouterLink
-                    :to="{ name: 'company-profile-edit-company' }"
-                    class="account-menu-item"
-                  >
-                    <i class="lnir lnir-briefcase" aria-hidden="true"></i>
-                    <span>Company</span>
-                    <span class="end">
-                      <i aria-hidden="true" class="fas fa-arrow-right"></i>
-                    </span>
-                  </RouterLink>
                   <RouterLink
                     :to="{ name: 'company-profile-edit-settings' }"
                     class="account-menu-item"

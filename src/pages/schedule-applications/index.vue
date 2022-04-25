@@ -12,9 +12,11 @@ import { defaultTheme } from '/@src/state/defaultLayoutState'
     open-on-mounted
     default-sidebar="dashboard"
   >
+    <!-- Content Wrapper -->
     <div class="page-content-inner">
-      <JobDashboard />
+      <JobsDashboard />
     </div>
   </DefaultLayout>
 </template>
+
 

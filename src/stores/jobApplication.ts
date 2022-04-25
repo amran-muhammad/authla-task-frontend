@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
-import { useRoute,useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import common from './action/common'
 import { useLocalStorage } from '@vueuse/core'
 import { useJobOpening } from './jobOpening'
@@ -17,10 +17,10 @@ export interface AppHolder {
   company_id: 0
   name: string
   country: string
-  selected_by_shared_view: boolean,
-  commented_by_shared_view: string,
+  selected_by_shared_view: boolean
+  commented_by_shared_view: string
   phone: string
-  filesize: string   
+  filesize: string
   email: string
   title: string
   status: string
@@ -34,7 +34,7 @@ export interface AppHolder {
   total_video: string
   average_score: number
   review_progress: number
-  is_shared:boolean
+  is_shared: boolean
   job_opening: any
   deadlineRange: string
 }
@@ -54,7 +54,7 @@ export const useJobApplication = defineStore('jobApplication', () => {
   const filters = {
     show: 10,
     sort: 'DESC',
- 
+
     video: false,
     text: false,
     country: '',
@@ -62,7 +62,7 @@ export const useJobApplication = defineStore('jobApplication', () => {
     pageCount: 0,
     status: '',
     searchkey: '',
-    job_position: ''
+    job_position: '',
   }
   const deleteIndex = ref(-1)
   const total = ref(0)
@@ -78,10 +78,10 @@ export const useJobApplication = defineStore('jobApplication', () => {
   const total_job_application_rejected = ref(0)
   const basic_info = useLocalStorage('basic_info', {}) as any
   const is_basic_info = useLocalStorage('is_basic_info', false)
-  const formAnswers = useLocalStorage('formAnswers', []) 
-  const progress = useLocalStorage('progress', 0) 
+  const formAnswers = useLocalStorage('formAnswers', [])
+  const progress = useLocalStorage('progress', 0)
   const videoLinks: string[] = []
-  const jobOpening:any = useJobOpening()
+  const jobOpening: any = useJobOpening()
   const pc = reactive<ProcessComplete>({
     process_complete: 'no',
   })
@@ -99,7 +99,7 @@ export const useJobApplication = defineStore('jobApplication', () => {
     title: '',
     status: '',
     applied_on: '',
-    created_at:'',
+    created_at: '',
     cv: '',
     cover_letter: '',
     answer: [],
@@ -126,7 +126,7 @@ export const useJobApplication = defineStore('jobApplication', () => {
     cv: '',
     phone: '',
     filesize: '',
-    cover_letter:''
+    cover_letter: '',
   }) as any
 
   const view_settings = ref({
@@ -135,7 +135,7 @@ export const useJobApplication = defineStore('jobApplication', () => {
     is_interview: true,
     is_questionnaire: true,
     selected_application: 0,
-    autoplay: false
+    autoplay: false,
   }) as any
 
   function setLoading(value: boolean) {
@@ -159,103 +159,98 @@ export const useJobApplication = defineStore('jobApplication', () => {
     basic_info.value = {}
     is_basic_info.value = false
   }
-  
-  async function get_job_catagories(){
-    const res:any = await common.getApi('api/job-application/job-titles/get' ,{})
+
+  async function get_job_catagories() {
+    const res: any = await common.getApi(
+      'api/job-application/job-titles/get',
+      {}
+    )
     job_categories.value = res.data.data
-     if(filters.job_position==''){
+    if (filters.job_position == '') {
       total_job_application.value = res.data.total_job_application
-      total_job_application_pending.value = res.data.total_job_application_pending
-      total_job_application_accepted.value = res.data.total_job_application_accepted
-      total_job_application_rejected.value = res.data.total_job_application_rejected
+      total_job_application_pending.value =
+        res.data.total_job_application_pending
+      total_job_application_accepted.value =
+        res.data.total_job_application_accepted
+      total_job_application_rejected.value =
+        res.data.total_job_application_rejected
     }
     total_job_opening.value = res.data.total_job_opening
   }
 
-
-  async function get_job_status_statistics_according_to_job(id:any){
-  const res:any = await common.getApi(`api/job_application/status/${id}` ,{})
-  if(res.data.status){
-    console.log('get_job_status_statistics_according_to_job',res.data)
-  }
-  stats.value = res.data.data
-
+  async function get_job_status_statistics_according_to_job(id: any) {
+    const res: any = await common.getApi(`api/job_application/status/${id}`, {})
+    if (res.data.status) {
+      console.log('get_job_status_statistics_according_to_job', res.data)
+    }
+    stats.value = res.data.data
   }
 
-  async function share_applications(id:number,status:boolean){
-    const res: any = await common.putApi(
-      `api/job_application/${id}`,
-      {"is_shared":status}
-    )
-
+  async function share_applications(id: number, status: boolean) {
+    const res: any = await common.putApi(`api/job_application/${id}`, {
+      is_shared: status,
+    })
 
     if (res.data.status) {
       app_holder.answer[res.data.index].is_shared = res.data.data.is_shared
-       console.log("OK lets go")
+      console.log('OK lets go')
       check_rp()
       return res.data.status
     }
-
-
-
   }
 
-  async function review_shared_applications(id:number,input:string,thumb:boolean,comment:string){
- 
+  async function review_shared_applications(
+    id: number,
+    input: string,
+    thumb: boolean,
+    comment: string
+  ) {
     const res: any = await common.putApi(
       `api/job_application/shared_view/${id}`,
-      {   "input":input,	
-          "selected_by_shared_view":thumb,
-          "commented_by_shared_view":comment
+      {
+        input: input,
+        selected_by_shared_view: thumb,
+        commented_by_shared_view: comment,
       }
     )
- 
- 
   }
 
-  async function deleteTheApplication(id:any){
+  async function deleteTheApplication(id: any) {
     loading.value = false
-    const res: any = await common.deleteApi(
-      `api/job_application/${id}`,{}
-    )
-    if(res.status == 200 && res.data.data){
+    const res: any = await common.deleteApi(`api/job_application/${id}`, {})
+    if (res.status == 200 && res.data.data) {
       loading.value = true
       jobApplicationDeleteModal.value = false
-      get();
-      get_job_catagories();
+      get()
+      get_job_catagories()
     }
   }
 
   async function save() {
     let edit = 0
-    if(is_basic_info.value == true){
+    if (is_basic_info.value == true) {
       edit = 1
       is_basic_info.value = false
       basic_info.value = {}
       formAnswers.value = []
       progress.value = 0
-    }else{
+    } else {
       data.value.company_id = jobOpening.data.company_id
     }
-    if(data.value.country==''){
-      data.value.phone = '+974'+data.value.phone
+    if (data.value.country == '') {
+      data.value.phone = '+974' + data.value.phone
       data.value.country = 'Qatar'
-    }else{
-      data.value.phone = allcountries.find((obj: any) => obj.name === data.value.country).dial_code+''+data.value.phone
     }
-    const res: any = await common.postApi(
-      'api/job_application',
-      data.value
-    )
-    if(edit==0 ){
+    const res: any = await common.postApi('api/job_application', data.value)
+    if (edit == 0) {
       is_basic_info.value = true
       basic_info.value = res.data.data
     }
     return res
   }
 
-  const sendEmailAppliedSuccess = async(form_input:any)=>{
-    await common.postApi('api/email',form_input)
+  const sendEmailAppliedSuccess = async (form_input: any) => {
+    await common.postApi('api/email', form_input)
   }
 
   const currentPage = computed(() => {
@@ -266,128 +261,122 @@ export const useJobApplication = defineStore('jobApplication', () => {
     } catch {}
     return 1
   })
-  
-  async function get_single_job(id:any){
+
+  async function get_single_job(id: any) {
     filters.page = 1
-    const url = 'api/job_application/'+id
-    const res: any = await common.getApi(
-      url,
-      filters
-    )
-    let dateFormation = ""
-    if(res.data.data.created_at){
+    const url = 'api/job_application/' + id
+    const res: any = await common.getApi(url, filters)
+    let dateFormation = ''
+    if (res.data.data.created_at) {
       dateFormation = res.data.data.created_at.substring(0, 10).split('-')
-      dateFormation = dateFormation[2]+'/'+dateFormation[1]+'/'+dateFormation[0]
+      dateFormation =
+        dateFormation[2] + '/' + dateFormation[1] + '/' + dateFormation[0]
     }
     let dedlineDateFormation = ''
-    if(res.data.data.job_opening.applicationdeadline){
-      dedlineDateFormation =  res.data.data.job_opening.applicationdeadline.substring(0, 10).split('-')
-      dedlineDateFormation = dedlineDateFormation[2]+'/'+dedlineDateFormation[1]+'/'+dedlineDateFormation[0]
+    if (res.data.data.job_opening.applicationdeadline) {
+      dedlineDateFormation = res.data.data.job_opening.applicationdeadline
+        .substring(0, 10)
+        .split('-')
+      dedlineDateFormation =
+        dedlineDateFormation[2] +
+        '/' +
+        dedlineDateFormation[1] +
+        '/' +
+        dedlineDateFormation[0]
     }
-    app_holder.deadlineRange = dateFormation+' to '+dedlineDateFormation
-    
+    app_holder.deadlineRange = dateFormation + ' to ' + dedlineDateFormation
+
     app_holder.id = res.data.data.id
-      app_holder.applied_on = dateFormation
-      app_holder.created_at = res.data.data.created_at
-      app_holder.name = res.data.data.name
-      app_holder.country = res.data.data.country
+    app_holder.applied_on = dateFormation
+    app_holder.created_at = res.data.data.created_at
+    app_holder.name = res.data.data.name
+    app_holder.country = res.data.data.country
 
-      app_holder.phone = res.data.data.phone
-      app_holder.filesize = res.data.data.filesize
-      app_holder.email = res.data.data.email
-      app_holder.cv = res.data.data.cv
-      app_holder.cover_letter = res.data.data.cover_letter
-      app_holder.is_shared = res.data.data.is_shared
-      app_holder.status = res.data.data.status
-      statusOfJobApplication.value = res.data.data.status
-      app_holder.title = res.data.data.job_opening.job_title
-      app_holder.company_id = res.data.data.job_opening.company_id
-      app_holder.answer = res.data.data.answer
-      app_holder.video_answer = res.data.data.video_answer
-      app_holder.job_opening = res.data.data.job_opening
-      app_holder.total_question = res.data.data.answer.length.toString()
-      app_holder.total_video = res.data.data.video_answer.length.toString()
-      app_holder.average_score = res.data.data.score
-      check_rp()
-
+    app_holder.phone = res.data.data.phone
+    app_holder.filesize = res.data.data.filesize
+    app_holder.email = res.data.data.email
+    app_holder.cv = res.data.data.cv
+    app_holder.cover_letter = res.data.data.cover_letter
+    app_holder.is_shared = res.data.data.is_shared
+    app_holder.status = res.data.data.status
+    statusOfJobApplication.value = res.data.data.status
+    app_holder.title = res.data.data.job_opening.job_title
+    app_holder.company_id = res.data.data.job_opening.company_id
+    app_holder.answer = res.data.data.answer
+    app_holder.video_answer = res.data.data.video_answer
+    app_holder.job_opening = res.data.data.job_opening
+    app_holder.total_question = res.data.data.answer.length.toString()
+    app_holder.total_video = res.data.data.video_answer.length.toString()
+    app_holder.average_score = res.data.data.score
+    check_rp()
   }
   async function get(page?: any) {
     placeloader.value = false
-    if(page){
+    if (page) {
       filters.page = Number(page)
     }
     const url = 'api/job_application'
-    
-    const res: any = await common.getApi(
-      url,
-      filters
-    )
-    if(res.status == 200){
+
+    const res: any = await common.getApi(url, filters)
+    if (res.status == 200) {
       placeloader.value = true
     }
-    
+
     dataList.value = res.data.data.data
     loading.value = true
     total.value = res.data.data.total
     perPage.value = res.data.data.per_page
     maxPage.value = Math.round(res.data.data.total / res.data.data.per_page)
-    if(filters.job_position || jobOpening.job_opening_name){
+    if (filters.job_position || jobOpening.job_opening_name) {
       total_job_application.value = res.data.statistics.total_job_application
-      total_job_application_pending.value = res.data.statistics.total_job_application_pending
-      total_job_application_accepted.value = res.data.statistics.total_job_application_accepted
-      total_job_application_rejected.value = res.data.statistics.total_job_application_rejected
+      total_job_application_pending.value =
+        res.data.statistics.total_job_application_pending
+      total_job_application_accepted.value =
+        res.data.statistics.total_job_application_accepted
+      total_job_application_rejected.value =
+        res.data.statistics.total_job_application_rejected
       jobOpening.removeJobOpeningName()
     }
   }
 
-  async function  get_shared_applications(id:any) {
+  async function get_shared_applications(id: any) {
     data.value.loading = true
     data.value.success = true
     data.value.public = true
     data.value.autoplay = false
 
-    const res: any = await common.getApi(
-      `api/job_application/share/${id}`,
-      {}             
+    const res: any = await common.getApi(`api/job_application/share/${id}`, {})
 
-    )
-  
     if (res.data.success) {
-       if(res.data.public){
+      if (res.data.public) {
         data.value.loading = false
         data.value = res.data
         data.value.selected_job = res.data.Job
         data.value.video_index = 0
         data.value.selected_index = 0
         data.value.selected_application = data.value.data[0]
+      } else {
+        //  Not Shared
+        data.value.loading = false
 
-
-       }else{
-      //  Not Shared
-      data.value.loading = false
-
-      data.value.public = false
+        data.value.public = false
       }
-
-    }else{
+    } else {
       data.value.loading = false
       data.value.success = false
-
     }
- 
-
- 
- 
   }
 
-  function setJobApps(item: any,index:any, isStop: boolean) {
+  function setJobApps(item: any, index: any, isStop: boolean) {
     deleteIndex.value = index
     const dateFormation = item.created_at.substring(0, 10).replaceAll('-', '/')
     let dedlineDateFormation = ''
-    if(item.job_opening.applicationdeadline){
-      dedlineDateFormation = item.job_opening.applicationdeadline.substring(0, 10).replaceAll('-', '/')
+    if (item.job_opening.applicationdeadline) {
+      dedlineDateFormation = item.job_opening.applicationdeadline
+        .substring(0, 10)
+        .replaceAll('-', '/')
     }
-    app_holder.deadlineRange = dateFormation+' to '+dedlineDateFormation
+    app_holder.deadlineRange = dateFormation + ' to ' + dedlineDateFormation
     app_holder.id = item.id
     app_holder.applied_on = dateFormation
     app_holder.created_at = item.created_at
@@ -404,10 +393,10 @@ export const useJobApplication = defineStore('jobApplication', () => {
     app_holder.total_question = item.answer.length.toString()
     app_holder.total_video = item.video_answer.length.toString()
     app_holder.filesize = item.filesize
-     if(isStop) gotoCompanyDetails()
+    if (isStop) gotoCompanyDetails()
   }
 
-  async function check_rp(score?:number) {
+  async function check_rp(score?: number) {
     let rp = 0
     let rps = 0
     let count_rp = 0
@@ -431,17 +420,21 @@ export const useJobApplication = defineStore('jobApplication', () => {
     }
     if (rp > 0) {
       app_holder.average_score = Math.round(rp / rps)
-      if(!score){
+      if (!score) {
         await changeScoreOfJobApplication()
-      }else{
+      } else {
         app_holder.average_score = score
       }
     }
     app_holder.review_progress = 0
-    if (count_rp > 0){
+    if (count_rp > 0) {
       app_holder.review_progress = Math.round((count_rp * 100) / rps)
     }
-    if(app_holder.answer.length == 0 && app_holder.video_answer.length == 0 && app_holder.status != 'Pending'){
+    if (
+      app_holder.answer.length == 0 &&
+      app_holder.video_answer.length == 0 &&
+      app_holder.status != 'Pending'
+    ) {
       app_holder.review_progress = 100
     }
   }
@@ -453,37 +446,35 @@ export const useJobApplication = defineStore('jobApplication', () => {
       form
     )
     if (res.data.status) {
-      
       app_holder.answer[res.data.index].rating = res.data.data.rating
       app_holder.answer[res.data.index].note = res.data.data.note
-       check_rp()
+      check_rp()
       return res.data.status
     }
   }
 
   // Save note or rate function
   async function save_change(form: any) {
-    console.log("The form sent",form);
+    console.log('The form sent', form)
     const res: any = await common.postApi(
       'job-application-question/v1/review',
       form
     )
 
-
     if (res.data.status) {
-      if(res.data.type=="video"){
-        if("note" in res.data.data){
+      if (res.data.type == 'video') {
+        if ('note' in res.data.data) {
           app_holder.video_answer[res.data.index].note = res.data.data.note
         }
-        if("rating" in res.data.data){
+        if ('rating' in res.data.data) {
           app_holder.video_answer[res.data.index].rating = res.data.data.rating
         }
       }
-      if(res.data.type=="text"){
-        if("note" in res.data.data){
+      if (res.data.type == 'text') {
+        if ('note' in res.data.data) {
           app_holder.answer[res.data.index].note = res.data.data.note
         }
-        if("rating" in res.data.data){
+        if ('rating' in res.data.data) {
           app_holder.answer[res.data.index].rating = res.data.data.rating
         }
       }
@@ -507,31 +498,31 @@ export const useJobApplication = defineStore('jobApplication', () => {
   }
 
   function gotoCompanyDetails() {
-    router.push(
-      '/job_application/list/details?' + 'job=' + app_holder.id
-    )
+    router.push('/job_application/list/details?' + 'job=' + app_holder.id)
   }
 
-   async function changeStatusOfJobApplication(){
-     loaderStatus.value=true
-     const res:any = await common.putApi('api/job_application/'+app_holder.id, {
-       status: app_holder.status
-     })
-     if(res.status==200) {
+  async function changeStatusOfJobApplication() {
+    loaderStatus.value = true
+    const res: any = await common.putApi(
+      'api/job_application/' + app_holder.id,
+      {
+        status: app_holder.status,
+      }
+    )
+    if (res.status == 200) {
       loaderStatus.value = false
       statusOfJobApplication.value = app_holder.status
       jobApplicationStatusModal.value = false
-     }
-     check_rp()
-     
-   }
-   async function changeScoreOfJobApplication(){
-     await common.putApi('api/job_application/'+app_holder.id, {
-       score: app_holder.average_score
-     })
-   }
-   
-   const calculateProgress = () => {
+    }
+    check_rp()
+  }
+  async function changeScoreOfJobApplication() {
+    await common.putApi('api/job_application/' + app_holder.id, {
+      score: app_holder.average_score,
+    })
+  }
+
+  const calculateProgress = () => {
     let fa = 0
     jobOpening.data.question.forEach((element: any, index: number) => {
       if (
@@ -542,10 +533,11 @@ export const useJobApplication = defineStore('jobApplication', () => {
         fa = fa + 1
       }
     })
-  
+
     progress.value = Math.round(
       (100 * (fa + videoLinks.length)) /
-        (jobOpening.data.question.length + jobOpening.data.video_question.length)
+        (jobOpening.data.question.length +
+          jobOpening.data.video_question.length)
     )
   }
 
@@ -589,7 +581,8 @@ export const useJobApplication = defineStore('jobApplication', () => {
     updateRatingAndNote,
     updateVideoRatingAndNote,
     save,
-    check_rp,get_job_status_statistics_according_to_job,
+    check_rp,
+    get_job_status_statistics_according_to_job,
     get_job_catagories,
     deleteTheApplication,
     gotoCompanyDetails,
@@ -597,6 +590,6 @@ export const useJobApplication = defineStore('jobApplication', () => {
     changeStatusOfJobApplication,
     calculateProgress,
     sendEmailAppliedSuccess,
-    changeScoreOfJobApplication
+    changeScoreOfJobApplication,
   } as const
 })

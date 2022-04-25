@@ -15,7 +15,6 @@ export const useCompany = defineStore('company', () => {
       `api/company/${id}`,
       {}
     )
-    data.comp_view = res.data
   }
   const pchek: String = ""
   const step = ref(1)
@@ -36,19 +35,7 @@ export const useCompany = defineStore('company', () => {
       changeEditPhoneAfterEdit.value = false
     }
   }
-  const data = reactive<CompanyData>({
-    id:0,
-    name: '',
-    email: '',
-    phone: '',
-    email_verified_at: '',
-    password: '',
-    status: '',
-    department: '',
-    course: '',
-    studentID: '',
-    type: 0
-  }) as any
+  
   const password_data = reactive<PasswordChange>({
     email:'',
     old_password: '',
@@ -61,7 +48,35 @@ export const useCompany = defineStore('company', () => {
     subject: '',
     message: ''
   })
-
+  const extra_data = reactive<CompanyExtraData>({
+    id: 0,
+    user_id: 0,
+    name: '',
+    logo: '',
+    industry: '',
+    country: 'Qatar',
+    number_of_employee: '50-100',
+    description: '',
+    address: '',
+    phone: '',
+    email: '',
+    package: '',
+    slug: '',
+    slot: 6,
+    video_question_slot: 3,
+    screening_question_slot: 3,
+    profile_visibility: true,
+    timezone: 'Asia/Qatar',
+    website: null,
+    linkedin: null,
+    twitter: null,
+    facebook: null,
+    instagram: null,
+    email_accept: false,
+    email_reject: false,
+    email_sortlisted: false,
+    email_interview: false,
+  })
   let data_view = {} as any
 
   const stepTitle = computed(() => {
@@ -87,31 +102,7 @@ export const useCompany = defineStore('company', () => {
     step.value = value
   }
   let data_stats = {} as any
-  async function save() {
-    loading.value = true
-    try {
-
-      const saved_company:any = await common.postApi('company/v1/create',{data})
-    if(saved_company.status== 200 && saved_company.data.success==true){
-      loading.value = false
-      notyf.success("Company registration successful!")
-      data.id = saved_company.data.company.id
-      data.name = saved_company.data.company.name
-      data.email = saved_company.data.company.email
-      data.avatar = saved_company.data.company.avatar
-
-      return true
-    }
-    else if(saved_company.data.success==false){
-      notyf.error(saved_company.data.msg) 
-      return false
-    }
-    } catch (error) {
-      notyf.error("Server Error! Try again")
-      return false
-    }
-   
-  }
+ 
   function resetContactForm(){
     contact_form.name = ''
     contact_form.phone = ''
@@ -124,24 +115,6 @@ export const useCompany = defineStore('company', () => {
     password_data.new_password = ''
     password_data.email = ''
   }
-  function reset() {
-    data.name = ''
-    data.email = ''
-    data.phone = ''
-    data.email_verified_at = ''
-    data.password = ''
-    data.avatar = null
-    data.status = ''
-    data.course = ''
-    data.department = ''
-    data.studentID = ''
-    data.type = 0
-  }
- 
- 
-
-
-
 
   return {
     changeEditPhoneAfterEdit,
@@ -154,16 +127,14 @@ export const useCompany = defineStore('company', () => {
     pchek,
     loading,
     stepTitle,
-    data,
     data_view,
+    extra_data,
     data_stats,
     getCurrentData,
     editPhoneChange,
     resetPasswordData,
     setLoading,
     setStep,
-    save,
-    reset,
     resetContactForm
   } as const
 })

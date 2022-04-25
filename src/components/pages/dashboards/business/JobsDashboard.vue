@@ -1,32 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useJobApplication } from '/@src/stores/jobApplication'
-import { useJobOpening } from '/@src/stores/jobOpening'
 import { useRouter } from 'vue-router'
 
 import moment from 'moment'
 import useNotyf from '/@src/composable/useNotyf'
+import { useScheduleStore } from '/@src/stores/scheduleStore'
+import { useUserStore } from '/@src/stores/userStore'
 
-import { useCountryMobile } from '/@src/assets/countrymobile.json'
-const allcountries = useCountryMobile
 const notyf = useNotyf()
-
-function copylink(text: string) {
-  var textArea = document.createElement('textarea')
-  textArea.value = text
-  document.body.appendChild(textArea)
-  textArea.focus()
-  textArea.select()
-
-  try {
-    var successful = document.execCommand('copy')
-    var msg = successful ? 'successful' : 'unsuccessful'
-    notyf.success('Link is been copied to clipboard')
-  } catch (err) {
-    console.log('Oops, unable to copy')
-  }
-  document.body.removeChild(textArea)
-}
+const scheduleStore = useScheduleStore()
+const userStore = useUserStore()
 
 moment.updateLocale('en', {
   relativeTime: {
@@ -36,65 +19,41 @@ moment.updateLocale('en', {
     MM: '%d mon',
   },
 })
-const jobOpening: any = useJobOpening()
+
 const router = useRouter()
-const open = async (value: object) => {
-  jobOpening.editData(value)
-  router.push('/job_opening/edit')
-}
-
-let job_application: any = useJobApplication()
 
 // Get initials from name
-const getInitials = (name: any) => {
-  let initials = name.split(' ')
-  if (initials.length > 1) {
-    initials = initials.shift().charAt(0) + initials.pop().charAt(0)
-  } else {
-    initials = name.substring(0, 2)
-  }
-  return initials.toUpperCase()
-}
-
-// Get initials from name
-const filter = (status: string) => {
-  job_application.filters.status = status
-  job_application.get()
-}
+// const filter = (status: string) => {
+//   job_application.filters.status = status
+//   job_application.get()
+// }
 
 let itemOfCard: any = ref({})
-const assignDetailsOfPositionCard = (job_title: any) => {
-  let index: number = job_application.job_categories.findIndex(
-    (x: any) => x.job_title == job_title
-  )
-  job_application.get_job_status_statistics_according_to_job(
-    job_application.job_categories[index].id
-  )
+// const assignDetailsOfPositionCard = (job_title: any) => {
+//   let index: number = job_application.job_categories.findIndex(
+//     (x: any) => x.job_title == job_title
+//   )
+//   job_application.get_job_status_statistics_according_to_job(
+//     job_application.job_categories[index].id
+//   )
 
-  itemOfCard.value = job_application.job_categories[index]
-  if (itemOfCard.value.created_at) {
-    itemOfCard.value.created_at = itemOfCard.value.created_at
-      .substring(0, 10)
-      .split('-')
-    itemOfCard.value.created_at =
-      itemOfCard.value.created_at[2] +
-      '/' +
-      itemOfCard.value.created_at[1] +
-      '/' +
-      itemOfCard.value.created_at[0]
-  }
-  job_application.get()
-}
+//   itemOfCard.value = job_application.job_categories[index]
+//   if (itemOfCard.value.created_at) {
+//     itemOfCard.value.created_at = itemOfCard.value.created_at
+//       .substring(0, 10)
+//       .split('-')
+//     itemOfCard.value.created_at =
+//       itemOfCard.value.created_at[2] +
+//       '/' +
+//       itemOfCard.value.created_at[1] +
+//       '/' +
+//       itemOfCard.value.created_at[0]
+//   }
+//   job_application.get()
+// }
 
 onMounted(() => {
-  job_application.get_job_catagories().then(() => {
-    if (jobOpening.job_opening_name) {
-      job_application.filters.job_position = jobOpening.job_opening_name
-      assignDetailsOfPositionCard(jobOpening.job_opening_name)
-    } else {
-      job_application.get()
-    }
-  })
+  scheduleStore.getAllCommonBookings()
 })
 </script>
 
@@ -102,24 +61,38 @@ onMounted(() => {
   <div class="jobs-dashboard">
     <!-- delete job application modal start -->
     <VModal
-      :open="job_application.jobApplicationDeleteModal"
+      :open="scheduleStore.bookingDeleteModal"
       size="small"
       actions="center"
       noclose
-      @close="job_application.jobApplicationDeleteModal = false"
+      @close="scheduleStore.bookingDeleteModal = false"
     >
       <template #content>
         <VPlaceholderSection
-          title="Are you sure you want to delete the  the application?"
+          title="Are you sure you want to Delete the  the application?"
         />
       </template>
       <template #action>
-        <VButton
-          :loading="!job_application.loading"
-          @click="
-            job_application.deleteTheApplication(job_application.app_holder.id)
-          "
-          raised
+        <VButton @click="scheduleStore.deleteOfBooking()" raised
+          >Confirm</VButton
+        >
+      </template>
+    </VModal>
+    <!-- delete job application modal start -->
+    <VModal
+      :open="scheduleStore.bookingViewModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="scheduleStore.bookingViewModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Accept the  the application?"
+        />
+      </template>
+      <template #action>
+        <VButton @click="scheduleStore.statusUpdateOfBooking()" raised
           >Confirm</VButton
         >
       </template>
@@ -139,7 +112,7 @@ onMounted(() => {
           <VField>
             <VControl class="has-icons-left">
               <div class="select">
-                <select
+                <!-- <select
                   v-model="job_application.filters.status"
                   @change="
                     assignDetailsOfPositionCard(
@@ -154,7 +127,7 @@ onMounted(() => {
                   <option value="Hired">Hired</option>
                   <option value="Offered">Offered</option>
                   <option value="Rejected">Rejected</option>
-                </select>
+                </select> -->
               </div>
               <div class="icon is-small is-left">
                 <i class="iconify" data-icon="feather:sliders"></i>
@@ -165,7 +138,7 @@ onMounted(() => {
           <VField>
             <VControl class="has-icons-left">
               <div class="select">
-                <select
+                <!-- <select
                   v-model="job_application.filters.job_position"
                   @change="
                     assignDetailsOfPositionCard(
@@ -182,7 +155,7 @@ onMounted(() => {
                   >
                     {{ item.job_title }}
                   </option>
-                </select>
+                </select> -->
               </div>
               <div class="icon is-small is-left">
                 <i class="iconify" data-icon="feather:briefcase"></i>
@@ -193,7 +166,7 @@ onMounted(() => {
           <VField>
             <VControl class="has-icons-left">
               <div class="select">
-                <select
+                <!-- <select
                   v-model="job_application.filters.country"
                   @change="job_application.get()"
                 >
@@ -206,7 +179,7 @@ onMounted(() => {
                   >
                     {{ item.name }}
                   </option>
-                </select>
+                </select> -->
               </div>
               <div class="icon is-small is-left">
                 <i class="iconify" data-icon="feather:globe"></i>
@@ -216,45 +189,20 @@ onMounted(() => {
 
           <VField class="m-t-25 m-b-5">
             <VControl icon="feather:search">
-              <input
+              <!-- <input
                 v-model="job_application.filters.searchkey"
                 type="text"
                 class="input"
                 placeholder="Candidate's name or email"
                 @keyup.enter="job_application.get()"
-              />
+              /> -->
             </VControl>
           </VField>
           <small class="search-info"><p>Press enter to search</p></small>
-
-          <table class="m-t-15">
-            <tr>
-              <td>
-                <VSwitchBlock
-                  class="m-r-40"
-                  v-model="job_application.filters.text"
-                  :checked="job_application.filters.text"
-                  @change="job_application.get()"
-                  label="Text"
-                  color="primary"
-                />
-              </td>
-
-              <td>
-                <VSwitchBlock
-                  v-model="job_application.filters.video"
-                  :checked="job_application.filters.video"
-                  @change="job_application.get()"
-                  label="Video"
-                  color="primary"
-                />
-              </td>
-            </tr>
-          </table>
         </VCard>
         <!-- {{ job_application.filters }} -->
 
-        <VCard
+        <!-- <VCard
           v-if="job_application.filters.job_position"
           class="m-b-30 p-b-30 p-t-20 job-card"
         >
@@ -289,18 +237,6 @@ onMounted(() => {
               >Edit Opening</VButton
             >
             <VButton
-              @click="
-                copylink(
-                  jobOpening.origin +
-                    '/shared_applications/' +
-                    job_application.job_categories[
-                      job_application.job_categories.findIndex(
-                        (x: any) =>
-                          x.job_title == job_application.filters.job_position
-                      )
-                    ].encrypt_id_url
-                )
-              "
               fullwidth
               bold
               class="m-t-10"
@@ -313,7 +249,7 @@ onMounted(() => {
               </p></small
             >
           </div>
-        </VCard>
+        </VCard> -->
       </div>
 
       <!--Results-->
@@ -323,403 +259,106 @@ onMounted(() => {
         <!--Results content-->
         <div class="page-content-inner">
           <div class="flex-list-wrapper flex-list-v1">
-            <VCard
-              v-if="!job_application.filters.job_position"
-              class="column p-50 m-b-25 is-12"
-            >
-              <div class="columns is-multiline is-flex-tablet-p">
-                <div class="column is-one-fifth">
-                  <div class="dashboard-card">
-                    <VBlock
-                      :title="job_application.total_job_opening"
-                      subtitle="Jobs Posted"
-                      center
-                    >
-                      <template #icon>
-                        <VIconBox color="primary-grey" rounded>
-                          <i
-                            aria-hidden="true"
-                            class="iconify"
-                            data-icon="feather:briefcase"
-                          ></i>
-                        </VIconBox>
-                      </template>
-                    </VBlock>
-                  </div>
-                </div>
-                <div class="column is-one-fifth">
-                  <div class="dashboard-card">
-                    <VBlock
-                      :title="job_application.total_job_application"
-                      subtitle="Applications"
-                      center
-                    >
-                      <template #icon>
-                        <VIconBox color="purple" rounded>
-                          <i
-                            aria-hidden="true"
-                            class="iconify"
-                            data-icon="feather:radio"
-                          ></i>
-                        </VIconBox>
-                      </template>
-                    </VBlock>
-                  </div>
-                </div>
-                <div class="column is-one-fifth">
-                  <div class="dashboard-card">
-                    <VBlock
-                      :title="job_application.total_job_application_pending"
-                      subtitle="Pending"
-                      center
-                    >
-                      <template #icon>
-                        <VIconBox color="yellow" rounded>
-                          <i
-                            aria-hidden="true"
-                            class="iconify"
-                            data-icon="feather:box"
-                          ></i>
-                        </VIconBox>
-                      </template>
-                    </VBlock>
-                  </div>
-                </div>
-                <div class="column is-one-fifth">
-                  <div class="dashboard-card">
-                    <VBlock
-                      :title="job_application.total_job_application_accepted"
-                      subtitle="Hired"
-                      center
-                    >
-                      <template #icon>
-                        <VIconBox color="green" rounded>
-                          <i
-                            aria-hidden="true"
-                            class="iconify"
-                            data-icon="feather:check"
-                          ></i>
-                        </VIconBox>
-                      </template>
-                    </VBlock>
-                  </div>
-                </div>
-                <div class="column is-one-fifth">
-                  <div class="dashboard-card">
-                    <VBlock
-                      :title="job_application.total_job_application_rejected"
-                      subtitle="Rejected"
-                      center
-                    >
-                      <template #icon>
-                        <VIconBox color="orange" rounded>
-                          <i
-                            aria-hidden="true"
-                            class="iconify"
-                            data-icon="feather:frown"
-                          ></i>
-                        </VIconBox>
-                      </template>
-                    </VBlock>
-                  </div>
-                </div>
-              </div>
-            </VCard>
-
-            <VCard
-              class="m-b-20 card-buttons"
-              v-if="job_application.filters.job_position"
-            >
-              <VButtons class="buttons-status">
-                <VButton
-                  :color="
-                    job_application.filters.status == 'Pending' ? 'dark' : ''
-                  "
-                  bold
-                  icon="feather:box"
-                  @click="filter('Pending')"
-                >
-                  Pending:
-                  {{
-                    job_application.stats ? job_application.stats.Pending : 0
-                  }}
-                </VButton>
-                <VButton
-                  :color="
-                    job_application.filters.status == 'Shortlisted'
-                      ? 'dark'
-                      : ''
-                  "
-                  bold
-                  icon="feather:user-check"
-                  @click="filter('Shortlisted')"
-                >
-                  Shortlisted:
-                  {{
-                    job_application.stats
-                      ? job_application.stats.Shortlisted
-                      : 0
-                  }}
-                </VButton>
-                <VButton
-                  :color="
-                    job_application.filters.status == 'Interviewed'
-                      ? 'dark'
-                      : ''
-                  "
-                  bold
-                  icon="feather:user-check"
-                  @click="filter('Interviewed')"
-                >
-                  Interviewed:
-                  {{
-                    job_application.stats
-                      ? job_application.stats.Interviewed
-                      : 0
-                  }}
-                </VButton>
-                <VButton
-                  :color="
-                    job_application.filters.status == 'Offered' ? 'dark' : ''
-                  "
-                  bold
-                  icon="feather:help-circle"
-                  @click="filter('Offered')"
-                >
-                  Offered:
-                  {{
-                    job_application.stats ? job_application.stats.Offered : 0
-                  }}
-                </VButton>
-                <VButton
-                  :color="
-                    job_application.filters.status == 'Hired' ? 'primary' : ''
-                  "
-                  bold
-                  icon="feather:check-circle"
-                  @click="filter('Hired')"
-                >
-                  {{ job_application.stats ? job_application.stats.Hired : 0 }}
-                </VButton>
-                <VButton
-                  :color="
-                    job_application.filters.status == 'Rejected' ? 'danger' : ''
-                  "
-                  bold
-                  icon="feather:x-circle"
-                  @click="filter('Rejected')"
-                >
-                  {{
-                    job_application.stats ? job_application.stats.Rejected : 0
-                  }}
-                </VButton>
-              </VButtons>
-            </VCard>
-            <div class="columns">
-              <div class="column is-3">
-                <h3 class="title is-6 m-b-15 p-l-5 p-t-10">
-                  Results:
-                  {{ job_application.total }}
-                </h3>
-              </div>
-              <div class="column is-7"></div>
-              <div class="column is-2">
-                <VField>
-                  <VControl class="has-icons-left">
-                    <div class="select is-rounded">
-                      <select
-                        v-model="job_application.filters.sort"
-                        @change="job_application.get()"
-                      >
-                        <option value="DESC" selected>Sort</option>
-                        <option value="DESC" selected>Newest</option>
-                        <option value="ASC" selected>Oldest</option>
-                      </select>
-                    </div>
-                    <div class="icon is-small is-left">
-                      <i class="iconify" data-icon="feather:filter"></i>
-                    </div>
-                  </VControl>
-                </VField>
-              </div>
-            </div>
             <VCard class="p-b-60">
               <div class="illustration-header"></div>
-              <div class="flex-table" v-if="job_application.placeloader">
+              <div class="flex-table">
                 <div
                   class="flex-table-header"
-                  :class="[
-                    job_application.dataList.length === 0 && 'is-hidden',
-                  ]"
+                  :class="[scheduleStore.bookings.length === 0 && 'is-hidden']"
                 >
-                  <span class="is-grow">Candidate</span>
-                  <span>Date</span>
+                  <span class="">Teacher</span>
+                  <span>Student</span>
+                  <span>From</span>
 
-                  <span>Position</span>
+                  <span>To</span>
+
+                  <span>Applied</span>
 
                   <span>Status</span>
-                  <span>V/Q</span>
-
-                  <span>Shared</span>
 
                   <span class="cell-end">Actions</span>
                 </div>
                 <div class="flex-list-inner">
                   <transition-group name="list" tag="div">
                     <div
-                      v-for="item in job_application.dataList"
-                      :key="item.id"
+                      v-for="(item, index) in scheduleStore.bookings"
+                      :key="index"
                       class="flex-table-item"
                     >
-                      <div
-                        @click="job_application.setJobApps(item, index, true)"
-                        class="flex-table-cell is-media is-grow"
-                      >
-                        <VAvatar
-                          :initials="getInitials(item.name)"
-                          :color="'h-danger'"
-                          size="medium"
-                        />
+                      <div class="flex-table-cell is-media">
                         <div>
                           <span class="item-name dark-inverted dots-name"
-                            >{{
-                              item.name.length > 15
-                                ? item.name.slice(0, 12) + '…'
-                                : item.name
-                            }}
-                          </span>
-                          <span class="rating colorGray">
-                            <i
-                              class="fas fa-star"
-                              aria-hidden="true"
-                              :class="[item.score >= 1 && 'warning-text']"
-                            ></i>
-                            <i
-                              class="fas fa-star"
-                              aria-hidden="true"
-                              :class="[item.score >= 2 && 'warning-text']"
-                            ></i>
-                            <i
-                              class="fas fa-star"
-                              aria-hidden="true"
-                              :class="[item.score >= 3 && 'warning-text']"
-                            ></i>
-                            <i
-                              class="fas fa-star"
-                              aria-hidden="true"
-                              :class="[item.score >= 4 && 'warning-text']"
-                            ></i>
-                            <i
-                              class="fas fa-star"
-                              aria-hidden="true"
-                              :class="[item.score >= 5 && 'warning-text']"
-                            ></i>
+                            >{{ item.userDetails[0].name }}
                           </span>
                         </div>
                       </div>
-                      <div
-                        @click="job_application.setJobApps(item, index, true)"
-                        class="flex-table-cell"
-                        data-th="Date"
-                      >
+                      <div class="flex-table-cell is-media">
+                        <div>
+                          <span class="item-name dark-inverted dots-name"
+                            >{{
+                              userStore.userData.type == 'student'
+                                ? userStore.userData.name
+                                : item.studentDetails[0].name
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="flex-table-cell is-media">
+                        <div>
+                          <span class="item-name dark-inverted dots-name">
+                            {{
+                              item.scheduleDetails[0].start_time < 12
+                                ? item.scheduleDetails[0].start_time + ' AM'
+                                : (item.scheduleDetails[0].start_time - 12 == 0
+                                    ? 12
+                                    : item.scheduleDetails[0].start_time - 12) +
+                                  ' PM'
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="flex-table-cell is-media">
+                        <div>
+                          <span class="item-name dark-inverted dots-name">
+                            {{
+                              item.scheduleDetails[0].end_time < 12
+                                ? item.scheduleDetails[0].end_time + ' AM'
+                                : (item.scheduleDetails[0].end_time - 12 == 0
+                                    ? 12
+                                    : item.scheduleDetails[0].end_time - 12) +
+                                  ' PM'
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="flex-table-cell" data-th="Date">
                         <small
                           class="light-text text-center"
                           v-tooltip="
                             'Applied on ' +
-                            moment(item.created_at).format('DD/MM/YYYY [at] LT')
+                            moment(item.time).format('DD/MM/YYYY [at] LT')
                           "
                         >
-                          {{ moment(item.created_at).fromNow(false) }}
+                          {{ moment(item.time).fromNow(false) }}
                         </small>
                       </div>
-                      <div
-                        @click="job_application.setJobApps(item, index, true)"
-                        class="flex-table-cell"
-                        data-th="Position"
-                      >
-                        <span class="light-text dots"
-                          >{{ item.job_opening.job_title }}
-                        </span>
-                      </div>
 
-                      <div
-                        @click="job_application.setJobApps(item, index, true)"
-                        class="flex-table-cell"
-                        data-th="Status"
-                      >
+                      <div class="flex-table-cell" data-th="Status">
                         <span v-if="item.status === 'Pending'" class="tag">{{
                           item.status
                         }}</span>
+
                         <span
-                          v-if="item.status === 'Shortlisted'"
-                          class="tag is-info"
-                          >{{ item.status }}</span
-                        >
-                        <span
-                          v-if="item.status === 'Offered'"
-                          class="tag is-warning"
-                          >{{ item.status }}</span
-                        >
-                        <span
-                          v-if="item.status === 'Interviewed'"
-                          class="tag is-info"
-                          >{{ item.status }}</span
-                        >
-                        <span
-                          v-else-if="item.status === 'Rejected'"
-                          class="tag is-danger"
-                          >{{ item.status }}</span
-                        >
-                        <span
-                          v-else-if="item.status === 'Hired'"
+                          v-else-if="item.status === 'Approved'"
                           class="tag is-primary"
                           >{{ item.status }}</span
                         >
                       </div>
-                      <div class="flex-table-cell" data-th="Position">
-                        <small class="light-text m-t-5">
-                          <i
-                            v-if="item.video_answer.length"
-                            class="iconify m-r-5"
-                            data-icon="feather:video"
-                            aria-hidden="true"
-                          ></i>
 
-                          <i
-                            v-if="item.answer.length"
-                            class="iconify"
-                            data-icon="feather:type"
-                            aria-hidden="true"
-                          ></i>
-                        </small>
-                      </div>
-                      <span class="flex-table-cell">
-                        <div class="control">
-                          <div class="">
-                            <label
-                              :for="'block-switch-' + item.id"
-                              class="form-switch"
-                              ><input
-                                :checked="item.is_shared"
-                                color="primary"
-                                :value="item.is_shared"
-                                @change="
-                                  job_application.share_applications(
-                                    item.id,
-                                    !item.is_shared ? 1 : 0
-                                  )
-                                "
-                                :id="'block-switch-' + item.id"
-                                type="checkbox"
-                                class="is-switch" /><i aria-hidden="true"></i
-                            ></label>
-                          </div>
-                        </div>
-                      </span>
                       <div
+                        @click="scheduleStore.setBookinData(item, index)"
                         class="flex-table-cell cell-end"
                         data-th="Actions"
-                        @click="job_application.setJobApps(item, index, false)"
                       >
                         <FlexTableDropdown />
                       </div>
@@ -727,23 +366,8 @@ onMounted(() => {
                   </transition-group>
                 </div>
               </div>
-              <div class="flex-table" v-else>
-                <div class="flex-table-header">
-                  <span class="is-grow">Candidate</span>
-                  <span>Date</span>
-                  <span>Position</span>
 
-                  <span>Status</span>
-                  <span>V/Q</span>
-
-                  <span>Shared</span>
-
-                  <span class="cell-end">Actions</span>
-                </div>
-                <PlaceloadV1 />
-              </div>
-
-              <div
+              <!-- <div
                 v-if="
                   job_application.dataList.length > 0 &&
                   job_application.total > 10
@@ -779,7 +403,7 @@ onMounted(() => {
                     alt=""
                   />
                 </template>
-              </VPlaceholderPage>
+              </VPlaceholderPage> -->
             </VCard>
           </div>
         </div>

@@ -59,18 +59,7 @@ async function send() {
     <div class="form-outer">
       <div class="form-body">
         <div class="form-section">
-          <div class="form-section-inner left-card">
-            <h3 class="has-text-centered">Tenrol, The future of hiring</h3>
-            <p class="p-b-20">
-              Reach out to us now, let's have a chat and you can Discover why we
-              are one of the fastest growing HR recruitment solutions
-            </p>
-            <img
-              class="second_sction_img"
-              src="/@src/assets/parts/contact.png"
-              alt="3d design - 3d business lady contact us through email - tenrol.com recruitment solution"
-            />
-          </div>
+          <div class="form-section-inner left-card"></div>
         </div>
         <div class="form-section">
           <div class="form-section-inner has-padding-bottom">

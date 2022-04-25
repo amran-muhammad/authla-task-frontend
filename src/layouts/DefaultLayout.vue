@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, watchPostEffect, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useCompany } from '../stores/company'
+import { useUserStore } from '../stores/userStore'
 
 import { activePanel } from '/@src/state/activePanelState'
 import { pageTitle } from '/@src/state/sidebarLayoutState'
 import { useUserSession } from '/@src/stores/userSession'
 
 const userSession = useUserSession()
-const company = useCompany()
+const userStore = useUserStore()
 const router = useRouter()
 
 export type SidebarTheme =
@@ -116,8 +116,13 @@ onMounted(() => {
           </RouterLink>
         </li>
 
-        <li>
-          <RouterLink :to="{ name: 'job_opening' }" data-content="Job Openings">
+        <li
+          v-if="
+            userStore.userData.type == 'teacher' ||
+            userStore.userData.type == 'admin'
+          "
+        >
+          <RouterLink :to="{ name: 'schedules' }" data-content="Schedules">
             <i
               aria-hidden="true"
               class="iconify sidebar-svg"
@@ -127,8 +132,8 @@ onMounted(() => {
         </li>
         <li>
           <RouterLink
-            :to="{ name: 'job_application' }"
-            data-content="Job Applications"
+            :to="{ name: 'schedule-applications' }"
+            data-content="Applications"
           >
             <i
               aria-hidden="true"
@@ -137,15 +142,22 @@ onMounted(() => {
             ></i>
           </RouterLink>
         </li>
-        <li v-if="company.data.id == 1">
-          <RouterLink
-            :to="{ name: 'contact_messages' }"
-            data-content="Contact Messages"
-          >
+        <li v-if="userStore.userData.type == 'admin'">
+          <RouterLink :to="{ name: 'students' }" data-content="Students">
             <i
               aria-hidden="true"
               class="iconify sidebar-svg"
-              data-icon="feather:mail"
+              data-icon="feather:users"
+            ></i>
+          </RouterLink>
+        </li>
+        <!-- Job Openings -->
+        <li v-if="userStore.userData.type == 'admin'">
+          <RouterLink :to="{ name: 'teachers' }" data-content="Teachers">
+            <i
+              aria-hidden="true"
+              class="iconify sidebar-svg"
+              data-icon="feather:users"
             ></i>
           </RouterLink>
         </li>
@@ -189,8 +201,13 @@ onMounted(() => {
         </li>
 
         <!-- Job Application -->
-        <li>
-          <RouterLink :to="{ name: 'job_opening' }" data-content="Job Openings">
+        <li
+          v-if="
+            userStore.userData.type == 'teacher' ||
+            userStore.userData.type == 'admin'
+          "
+        >
+          <RouterLink :to="{ name: 'schedules' }" data-content="Schedules">
             <i
               aria-hidden="true"
               class="iconify sidebar-svg"
@@ -202,7 +219,7 @@ onMounted(() => {
         <!-- Job Openings -->
         <li>
           <RouterLink
-            :to="{ name: 'job_application' }"
+            :to="{ name: 'schedule-applications' }"
             data-content="Applications"
           >
             <i
@@ -213,19 +230,26 @@ onMounted(() => {
           </RouterLink>
         </li>
         <!-- Job Openings -->
-
-        <li v-if="company.data.id == 1">
-          <RouterLink
-            :to="{ name: 'contact_messages' }"
-            data-content="Contact Messages"
-          >
+        <li v-if="userStore.userData.type == 'admin'">
+          <RouterLink :to="{ name: 'students' }" data-content="Students">
             <i
               aria-hidden="true"
               class="iconify sidebar-svg"
-              data-icon="feather:mail"
+              data-icon="feather:users"
             ></i>
           </RouterLink>
         </li>
+        <!-- Job Openings -->
+        <li v-if="userStore.userData.type == 'admin'">
+          <RouterLink :to="{ name: 'teachers' }" data-content="Teachers">
+            <i
+              aria-hidden="true"
+              class="iconify sidebar-svg"
+              data-icon="feather:users"
+            ></i>
+          </RouterLink>
+        </li>
+        <!-- Job Openings -->
       </template>
 
       <template #bottom-links>

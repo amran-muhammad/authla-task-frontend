@@ -1,6 +1,7 @@
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import useNotyf from '/@src/composable/useNotyf'
 import hrQuote from '/@src/data/landing/hr-quote.json'
 import { useScheduleStore } from '/@src/stores/scheduleStore'
 
@@ -10,13 +11,72 @@ const random = Math.floor(Math.random() * 101)
 const quotes = hrQuote
 const scheduleStore = useScheduleStore()
 const userStore = useUserStore()
+const searchTeacher = ref('')
+const searchDepartment = ref('')
+const agendaModal = ref(false)
+let item = ref({})
+let index = ref(-1)
+let studentID = ref(0)
+const notyf = useNotyf()
+
+function makeABooking() {
+  if (scheduleStore.agenda == '') {
+    return notyf.error('Please write an agenda to complete booking')
+  }
+  scheduleStore.bookSchedule(item.value, index.value, studentID.value)
+  agendaModal.value = false
+}
+
+function openAgenda(itemi: any, indexi: number, studentIDi: any) {
+  item.value = itemi
+  index.value = indexi
+  studentID.value = studentIDi
+  agendaModal.value = true
+}
+
+function makeListFromTeacher() {
+  searchDepartment.value = ''
+  scheduleStore.getAllCommonSchedulesByTeacher(searchTeacher.value)
+}
+function makeListFromDepartment() {
+  searchTeacher.value = ''
+  scheduleStore.getAllCommonSchedulesByDepartment(searchDepartment.value)
+}
 onMounted(() => {
+  userStore.getAllTeacher()
   scheduleStore.getAllCommonSchedules()
 })
 </script>
 
 <template>
   <div class="lifestyle-dashboard lifestyle-dashboard-v4">
+    <VModal
+      :open="agendaModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="agendaModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection title="Are sure to book this schedule?" />
+        <!--Field-->
+
+        <VField>
+          <label>Agenda </label>
+          <VControl>
+            <input
+              v-model="scheduleStore.agenda"
+              type="textarea"
+              class="textarea"
+              autocomplete="family-name"
+            />
+          </VControl>
+        </VField>
+      </template>
+      <template #action>
+        <VButton @click="makeABooking()" raised>Confirm</VButton>
+      </template>
+    </VModal>
     <div class="columns">
       <div class="column is-8">
         <div class="columns is-multiline">
@@ -51,6 +111,63 @@ onMounted(() => {
       </div>
     </div>
 
+    <VField class="column is-3">
+      <label>Filter by Teacher Name</label>
+      <VControl class="has-icons-left">
+        <div class="select">
+          <select @change="makeListFromTeacher" v-model="searchTeacher">
+            <option
+              v-for="(item, index) in userStore.teacher"
+              :key="index"
+              :value="item._id"
+            >
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="icon is-small is-left">
+          <i class="iconify" data-icon="feather:briefcase"></i>
+        </div>
+      </VControl>
+    </VField>
+    <VField class="column is-3">
+      <label>Filter by Department</label>
+      <VControl class="has-icons-left">
+        <div class="select">
+          <select @change="makeListFromDepartment" v-model="searchDepartment">
+            <option value="Advertising and marketing">
+              Advertising and marketing
+            </option>
+            <option value="Aerospace">Aerospace</option>
+            <option value="Agriculture">Agriculture</option>
+            <option value="Business Consultation">Business Consultation</option>
+            <option value="Computer and technology">
+              Computer and technology
+            </option>
+            <option value="Construction">Construction</option>
+            <option value="Education">Education</option>
+            <option value="Energy">Energy</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Finance and economic">Finance and economic</option>
+            <option value="Food and beverage">Food and beverage</option>
+            <option value="Health care">Health care</option>
+            <option value="Hospitality">Hospitality</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Media and news">Media and news</option>
+            <option value="Mining">Mining</option>
+            <option value="Pharmaceutical">Pharmaceutical</option>
+            <option value="Telecommunication">Telecommunication</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Other industries">Other industries</option>
+          </select>
+        </div>
+        <div class="icon is-small is-left">
+          <i class="iconify" data-icon="feather:briefcase"></i>
+        </div>
+      </VControl>
+    </VField>
+
     <VCard
       v-for="(item, index) in scheduleStore.schedules"
       :key="index"
@@ -74,17 +191,12 @@ onMounted(() => {
               : (item.end_time - 12 == 0 ? 12 : item.end_time - 12) + ' PM'
           }}
         </p>
+        <p>Day: {{ item.day }}</p>
         <p>Status: {{ item.status }}</p>
         <VButtons>
           <VButton
-            @click="
-              scheduleStore.bookSchedule(
-                item,
-                index,
-                userStore.userData.studentID
-              )
-            "
-            v-if="item.status == 'Open'"
+            @click="openAgenda(item, index, userStore.userData.studentID)"
+            v-if="item.status == 'Open' && userStore.userData.type == 'student'"
           >
             Book Now
           </VButton>
@@ -95,6 +207,7 @@ onMounted(() => {
         </p> -->
       </div>
     </VCard>
+    <VCard v-if="scheduleStore.schedules.length == 0"> No Data </VCard>
   </div>
 </template>
 

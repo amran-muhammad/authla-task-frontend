@@ -12,6 +12,8 @@ const notyf = useNotyf()
 const scheduleStore = useScheduleStore()
 
 const addNewScheduleModal = ref(false)
+const editScheduleModal = ref(false)
+const deleteScheduleModal = ref(false)
 
 const addNewSchedule = () => {
   addNewScheduleModal.value = true
@@ -25,9 +27,45 @@ const limit = ref(0)
 function changeEndTime() {
   limit.value = 24 - scheduleStore.form_data.start_time
 }
+function changeEndTimeInEdit() {
+  limit.value = 24 - scheduleStore.edit_data.start_time
+}
 function addNewScheduleItem() {
-  scheduleStore.createNew()
+  scheduleStore.createNew().then(() => {
+    scheduleStore.getAllSchedules()
+  })
   addNewScheduleModal.value = false
+}
+const editSchedule = () => {
+  scheduleStore.updateSchedule().then(() => {
+    scheduleStore.getAllSchedules()
+  })
+  editScheduleModal.value = false
+}
+
+function open(item: any) {
+  if (userStore.userData.type == 'admin') {
+    userStore.getAllTeacher()
+  }
+  editScheduleModal.value = true
+  scheduleStore.edit_data._id = item._id
+  scheduleStore.edit_data.day = item.day
+  scheduleStore.edit_data.teacher_id = item.teacher_id
+  scheduleStore.edit_data.start_time = item.start_time
+  scheduleStore.edit_data.end_time = item.end_time
+  scheduleStore.edit_data.status = item.status
+  scheduleStore.edit_data.department = item.department
+  limit.value = 24 - scheduleStore.edit_data.start_time
+}
+function openDelete(item: any) {
+  deleteScheduleModal.value = true
+  scheduleStore.edit_data._id = item._id
+}
+const deleteSchedule = () => {
+  scheduleStore.deleteSchedule().then(() => {
+    scheduleStore.getAllSchedules()
+  })
+  deleteScheduleModal.value = false
 }
 onMounted(() => {
   scheduleStore.getAllSchedules()
@@ -36,6 +74,22 @@ onMounted(() => {
 
 <template>
   <div class="all-projects">
+    <VModal
+      :open="deleteScheduleModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="deleteScheduleModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Delete the schedule?"
+        />
+      </template>
+      <template #action>
+        <VButton @click="deleteSchedule()" raised>Confirm</VButton>
+      </template>
+    </VModal>
     <VModal
       :open="addNewScheduleModal"
       size="medium"
@@ -71,7 +125,7 @@ onMounted(() => {
                 <option value="Saturday">Saturday</option>
                 <option value="Sunday">Sunday</option>
                 <option value="Monday">Monday</option>
-                <option value="Wednessday">Wednessday</option>
+                <option value="Wednesday">Wednesday</option>
                 <option value="Thursday">Thursday</option>
                 <option value="Friday">Friday</option>
               </select>
@@ -116,11 +170,124 @@ onMounted(() => {
             </div>
           </VControl>
         </VField>
+        <VField>
+          <label>Status</label>
+          <VControl class="has-icons-left">
+            <div class="select">
+              <select v-model="scheduleStore.form_data.status">
+                <option value="Open">Open</option>
+                <option value="Close">Close</option>
+              </select>
+            </div>
+            <div class="icon is-small is-left">
+              <i class="fas fa-clock"></i>
+            </div>
+          </VControl>
+        </VField>
       </template>
       <template #action>
         <VButton color="primary" @click="addNewScheduleItem" raised
           >Add</VButton
         >
+      </template>
+    </VModal>
+    <VModal
+      :open="editScheduleModal"
+      size="medium"
+      actions="center"
+      noclose
+      @close="editScheduleModal = false"
+    >
+      <template #content>
+        <VField v-if="userStore.userData.type == 'admin'">
+          <label>Teacher Name</label>
+          <VControl class="has-icons-left">
+            <div class="select">
+              <select v-model="scheduleStore.edit_data.teacher_id">
+                <option
+                  v-for="(item, index) in userStore.teacher"
+                  :key="index"
+                  :value="item._id"
+                >
+                  {{ item.name }}
+                </option>
+              </select>
+            </div>
+            <div class="icon is-small is-left">
+              <i class="fas fa-archway"></i>
+            </div>
+          </VControl>
+        </VField>
+        <VField>
+          <label>Day Name</label>
+          <VControl class="has-icons-left">
+            <div class="select">
+              <select v-model="scheduleStore.edit_data.day">
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+                <option value="Monday">Monday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+              </select>
+            </div>
+            <div class="icon is-small is-left">
+              <i class="fas fa-archway"></i>
+            </div>
+          </VControl>
+        </VField>
+        <VField>
+          <label>Start Time</label>
+          <VControl class="has-icons-left">
+            <div class="select">
+              <select
+                @click="changeEndTimeInEdit"
+                v-model="scheduleStore.edit_data.start_time"
+              >
+                <option v-for="n in 24" :key="n" :value="n">{{ n }}</option>
+              </select>
+            </div>
+            <div class="icon is-small is-left">
+              <i class="fas fa-clock"></i>
+            </div>
+          </VControl>
+        </VField>
+        <VField>
+          <label>End Time</label>
+          <VControl class="has-icons-left">
+            <div class="select">
+              <select v-model="scheduleStore.edit_data.end_time">
+                <option
+                  v-for="n in limit"
+                  :value="n + scheduleStore.edit_data.start_time"
+                  :key="n"
+                >
+                  {{ n + scheduleStore.edit_data.start_time }}
+                </option>
+              </select>
+            </div>
+            <div class="icon is-small is-left">
+              <i class="fas fa-clock"></i>
+            </div>
+          </VControl>
+        </VField>
+        <VField>
+          <label>Status</label>
+          <VControl class="has-icons-left">
+            <div class="select">
+              <select v-model="scheduleStore.edit_data.status">
+                <option value="Open">Open</option>
+                <option value="Close">Close</option>
+              </select>
+            </div>
+            <div class="icon is-small is-left">
+              <i class="fas fa-clock"></i>
+            </div>
+          </VControl>
+        </VField>
+      </template>
+      <template #action>
+        <VButton color="primary" @click="editSchedule" raised>Update</VButton>
       </template>
     </VModal>
     <div class="illustration-header m-b-20">
@@ -180,7 +347,20 @@ onMounted(() => {
                     </div>
                     <div class="meta">
                       <span>Edit</span>
-                      <span>Update the job opening</span>
+                      <span>Update the schedule</span>
+                    </div>
+                  </a>
+                  <a class="dropdown-item is-media" @click="openDelete(item)">
+                    <div class="icon">
+                      <i
+                        class="iconify"
+                        data-icon="feather:edit"
+                        aria-hidden="true"
+                      ></i>
+                    </div>
+                    <div class="meta">
+                      <span>Delete</span>
+                      <span>Delete the schedule</span>
                     </div>
                   </a>
                 </template>
@@ -209,6 +389,7 @@ onMounted(() => {
                         ' PM'
                   }}
                 </p>
+                <p>Status : {{ item.status }}</p>
 
                 <div v-if="item.userDetails && item.userDetails.length > 0">
                   <p>Teacher Name: {{ item.userDetails[0].name }}</p>

@@ -23,9 +23,6 @@ const { y } = useWindowScroll()
 const isScrolling = computed(() => {
   return y.value > 30
 })
-const userSession = useUserSession()
-
-let old_data: string = ''
 
 function ValidateEmail(mail: string) {
   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
@@ -36,6 +33,17 @@ function ValidateEmail(mail: string) {
 
 const onSave = () => {
   isLoading.value = true
+  userStore.edit_data._id = userStore.userData.id
+  userStore.edit_data.name = userStore.userData.name
+  userStore.edit_data.email = userStore.userData.email
+  userStore.edit_data.department = userStore.userData.department
+  userStore.edit_data.course = userStore.userData.course
+  userStore.edit_data.studentID = userStore.userData.studentID
+  userStore.edit_data.status = userStore.userData.status
+  userStore.edit_data.type = userStore.userData.type
+  userStore.updateUser().then(() => {
+    isLoading.value = false
+  })
 }
 </script>
 
@@ -74,7 +82,6 @@ const onSave = () => {
       <div class="fieldset">
         <div class="fieldset-heading">
           <h4>Personal Info</h4>
-          <p>Others diserve to know you more</p>
         </div>
 
         <div class="columns is-multiline">
@@ -105,6 +112,92 @@ const onSave = () => {
                   placeholder="Email"
                   autocomplete="family-name"
                 />
+              </VControl>
+            </VField>
+          </div>
+          <div class="column is-6">
+            <VField>
+              <label>Department</label>
+              <VControl class="has-icons-left">
+                <div class="select">
+                  <select v-model="userStore.userData.department">
+                    <option value="Advertising and marketing">
+                      Advertising and marketing
+                    </option>
+                    <option value="Aerospace">Aerospace</option>
+                    <option value="Agriculture">Agriculture</option>
+                    <option value="Business Consultation">
+                      Business Consultation
+                    </option>
+                    <option value="Computer and technology">
+                      Computer and technology
+                    </option>
+                    <option value="Construction">Construction</option>
+                    <option value="Education">Education</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Finance and economic">
+                      Finance and economic
+                    </option>
+                    <option value="Food and beverage">Food and beverage</option>
+                    <option value="Health care">Health care</option>
+                    <option value="Hospitality">Hospitality</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Media and news">Media and news</option>
+                    <option value="Mining">Mining</option>
+                    <option value="Pharmaceutical">Pharmaceutical</option>
+                    <option value="Telecommunication">Telecommunication</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Other industries">Other industries</option>
+                  </select>
+                </div>
+                <div class="icon is-small is-left">
+                  <i class="fas fa-archway"></i>
+                </div>
+              </VControl>
+            </VField>
+          </div>
+          <div v-if="userStore.userData.type == 'teacher'" class="column is-6">
+            <VField>
+              <label>Course</label>
+              <VControl class="has-icons-left">
+                <div class="select">
+                  <select v-model="userStore.userData.course">
+                    <option value="Advertising and marketing">
+                      Advertising and marketing
+                    </option>
+                    <option value="Aerospace">Aerospace</option>
+                    <option value="Agriculture">Agriculture</option>
+                    <option value="Business Consultation">
+                      Business Consultation
+                    </option>
+                    <option value="Computer and technology">
+                      Computer and technology
+                    </option>
+                    <option value="Construction">Construction</option>
+                    <option value="Education">Education</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Finance and economic">
+                      Finance and economic
+                    </option>
+                    <option value="Food and beverage">Food and beverage</option>
+                    <option value="Health care">Health care</option>
+                    <option value="Hospitality">Hospitality</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Media and news">Media and news</option>
+                    <option value="Mining">Mining</option>
+                    <option value="Pharmaceutical">Pharmaceutical</option>
+                    <option value="Telecommunication">Telecommunication</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Other industries">Other industries</option>
+                  </select>
+                </div>
+                <div class="icon is-small is-left">
+                  <i class="fas fa-archway"></i>
+                </div>
               </VControl>
             </VField>
           </div>

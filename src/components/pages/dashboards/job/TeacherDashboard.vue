@@ -13,29 +13,54 @@ const userStore: any = useUserStore()
 let userDeactivateModal = ref(false)
 let userActivateModal = ref(false)
 let userEditModal = ref(false)
+let userAddModal = ref(false)
 let id = ref('')
-let index = ref(-1)
-function makeReadyForUpdateStatusActive(obj: any, indexinput: number) {
+
+function copyUserData(item: any) {
+  userEditModal.value = true
+  userStore.edit_data._id = item._id
+  userStore.edit_data.name = item.name
+  userStore.edit_data.email = item.email
+  userStore.edit_data.type = item.type
+  userStore.edit_data.department = item.department
+  userStore.edit_data.course = item.course
+  userStore.edit_data.studentID = item.studentID
+  userStore.edit_data.status = item.status
+}
+function userEdit() {
+  userStore.updateUser().then(() => {
+    userStore.getAllTeacher()
+  })
+  userEditModal.value = false
+}
+
+function userAdd() {
+  userStore.form_data.type = 'teacher'
+  userStore.addUser().then(() => {
+    userStore.getAllTeacher()
+  })
+  userAddModal.value = false
+}
+
+function makeReadyForUpdateStatusActive(obj: any) {
   id.value = obj._id
-  index.value = indexinput
   userActivateModal.value = true
 }
-function makeReadyForUpdateStatusDeactive(obj: any, indexinput: number) {
+function makeReadyForUpdateStatusDeactive(obj: any) {
   id.value = obj._id
-  index.value = indexinput
   userDeactivateModal.value = true
 }
 function deactivateUser() {
-  userStore.statusUpdateOfUserDeactive(id.value)
+  userStore.statusUpdateOfUserDeactiveTeacher(id.value).then(() => {
+    userStore.getAllTeacher()
+  })
   userDeactivateModal.value = false
-  userStore.teacher.value[index.value].status = 'Pending'
-  //   console.log(userStore.teacher.value[index.value].status)
 }
 function activateUser() {
-  userStore.statusUpdateOfUserActive(id.value)
+  userStore.statusUpdateOfUserActiveTeacher(id.value).then(() => {
+    userStore.getAllTeacher()
+  })
   userActivateModal.value = false
-  userStore.teacher.value[index.value].status = 'Approved'
-  //   console.log(userStore.teacher.value[index.value].status)
 }
 onMounted(() => {
   userStore.getAllTeacher()
@@ -45,19 +70,296 @@ onMounted(() => {
 <template>
   <div class="lifestyle-dashboard lifestyle-dashboard-v4">
     <VModal
+      :open="userAddModal"
+      size="medium"
+      actions="center"
+      noclose
+      @close="userAddModal = false"
+    >
+      <template #content>
+        <div class="columns is-multiline">
+          <!--Field-->
+          <div class="column is-6">
+            <VField>
+              <label>Full Name</label>
+              <VControl icon="feather:user">
+                <input
+                  v-model="userStore.form_data.name"
+                  type="text"
+                  class="input"
+                  placeholder="Full Name"
+                  autocomplete="given-name"
+                />
+              </VControl>
+            </VField>
+          </div>
+          <!--Field-->
+          <div class="column is-6">
+            <VField>
+              <label>Email</label>
+              <VControl icon="feather:mail">
+                <input
+                  v-model="userStore.form_data.email"
+                  type="text"
+                  class="input"
+                  placeholder="Email"
+                  autocomplete="family-name"
+                />
+              </VControl>
+            </VField>
+          </div>
+          <!--Field-->
+          <div class="column is-6">
+            <VField>
+              <label>Password</label>
+              <VControl icon="feather:mail">
+                <input
+                  v-model="userStore.form_data.password"
+                  type="password"
+                  class="input"
+                  placeholder="Password"
+                  autocomplete="family-name"
+                />
+              </VControl>
+            </VField>
+          </div>
+          <div class="column is-6">
+            <VField>
+              <label>Department</label>
+              <VControl class="has-icons-left">
+                <div class="select">
+                  <select v-model="userStore.form_data.department">
+                    <option value="Advertising and marketing">
+                      Advertising and marketing
+                    </option>
+                    <option value="Aerospace">Aerospace</option>
+                    <option value="Agriculture">Agriculture</option>
+                    <option value="Business Consultation">
+                      Business Consultation
+                    </option>
+                    <option value="Computer and technology">
+                      Computer and technology
+                    </option>
+                    <option value="Construction">Construction</option>
+                    <option value="Education">Education</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Finance and economic">
+                      Finance and economic
+                    </option>
+                    <option value="Food and beverage">Food and beverage</option>
+                    <option value="Health care">Health care</option>
+                    <option value="Hospitality">Hospitality</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Media and news">Media and news</option>
+                    <option value="Mining">Mining</option>
+                    <option value="Pharmaceutical">Pharmaceutical</option>
+                    <option value="Telecommunication">Telecommunication</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Other industries">Other industries</option>
+                  </select>
+                </div>
+                <div class="icon is-small is-left">
+                  <i class="fas fa-archway"></i>
+                </div>
+              </VControl>
+            </VField>
+          </div>
+          <div class="column is-6">
+            <VField>
+              <label>Course</label>
+              <VControl class="has-icons-left">
+                <div class="select">
+                  <select v-model="userStore.form_data.course">
+                    <option value="Advertising and marketing">
+                      Advertising and marketing
+                    </option>
+                    <option value="Aerospace">Aerospace</option>
+                    <option value="Agriculture">Agriculture</option>
+                    <option value="Business Consultation">
+                      Business Consultation
+                    </option>
+                    <option value="Computer and technology">
+                      Computer and technology
+                    </option>
+                    <option value="Construction">Construction</option>
+                    <option value="Education">Education</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Finance and economic">
+                      Finance and economic
+                    </option>
+                    <option value="Food and beverage">Food and beverage</option>
+                    <option value="Health care">Health care</option>
+                    <option value="Hospitality">Hospitality</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Media and news">Media and news</option>
+                    <option value="Mining">Mining</option>
+                    <option value="Pharmaceutical">Pharmaceutical</option>
+                    <option value="Telecommunication">Telecommunication</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Other industries">Other industries</option>
+                  </select>
+                </div>
+                <div class="icon is-small is-left">
+                  <i class="fas fa-archway"></i>
+                </div>
+              </VControl>
+            </VField>
+          </div>
+          <div class="column is-6">
+            <VField>
+              <label>Status</label>
+              <VControl class="has-icons-left">
+                <div class="select">
+                  <select v-model="userStore.form_data.status">
+                    <option value="Approved">Approved</option>
+                    <option value="Pending">Pending</option>
+                  </select>
+                </div>
+                <div class="icon is-small is-left">
+                  <i class="fas fa-archway"></i>
+                </div>
+              </VControl>
+            </VField>
+          </div>
+        </div>
+      </template>
+      <template #action>
+        <VButton @click="userAdd()" raised>Confirm</VButton>
+      </template>
+    </VModal>
+    <VModal
       :open="userEditModal"
-      size="small"
+      size="medium"
       actions="center"
       noclose
       @close="userEditModal = false"
     >
       <template #content>
-        <VPlaceholderSection
-          title="Are you sure you want to Deactivate the teacher?"
-        />
+        <div class="columns is-multiline">
+          <!--Field-->
+          <div class="column is-6">
+            <VField>
+              <label>Full Name</label>
+              <VControl icon="feather:user">
+                <input
+                  v-model="userStore.edit_data.name"
+                  type="text"
+                  class="input"
+                  placeholder="Full Name"
+                  autocomplete="given-name"
+                />
+              </VControl>
+            </VField>
+          </div>
+          <!--Field-->
+          <div class="column is-6">
+            <VField>
+              <label>Email</label>
+              <VControl icon="feather:mail">
+                <input
+                  v-model="userStore.edit_data.email"
+                  type="text"
+                  class="input"
+                  placeholder="Email"
+                  autocomplete="family-name"
+                />
+              </VControl>
+            </VField>
+          </div>
+          <div class="column is-6">
+            <VField>
+              <label>Department</label>
+              <VControl class="has-icons-left">
+                <div class="select">
+                  <select v-model="userStore.edit_data.department">
+                    <option value="Advertising and marketing">
+                      Advertising and marketing
+                    </option>
+                    <option value="Aerospace">Aerospace</option>
+                    <option value="Agriculture">Agriculture</option>
+                    <option value="Business Consultation">
+                      Business Consultation
+                    </option>
+                    <option value="Computer and technology">
+                      Computer and technology
+                    </option>
+                    <option value="Construction">Construction</option>
+                    <option value="Education">Education</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Finance and economic">
+                      Finance and economic
+                    </option>
+                    <option value="Food and beverage">Food and beverage</option>
+                    <option value="Health care">Health care</option>
+                    <option value="Hospitality">Hospitality</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Media and news">Media and news</option>
+                    <option value="Mining">Mining</option>
+                    <option value="Pharmaceutical">Pharmaceutical</option>
+                    <option value="Telecommunication">Telecommunication</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Other industries">Other industries</option>
+                  </select>
+                </div>
+                <div class="icon is-small is-left">
+                  <i class="fas fa-archway"></i>
+                </div>
+              </VControl>
+            </VField>
+          </div>
+          <div class="column is-6">
+            <VField>
+              <label>Course</label>
+              <VControl class="has-icons-left">
+                <div class="select">
+                  <select v-model="userStore.edit_data.course">
+                    <option value="Advertising and marketing">
+                      Advertising and marketing
+                    </option>
+                    <option value="Aerospace">Aerospace</option>
+                    <option value="Agriculture">Agriculture</option>
+                    <option value="Business Consultation">
+                      Business Consultation
+                    </option>
+                    <option value="Computer and technology">
+                      Computer and technology
+                    </option>
+                    <option value="Construction">Construction</option>
+                    <option value="Education">Education</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Finance and economic">
+                      Finance and economic
+                    </option>
+                    <option value="Food and beverage">Food and beverage</option>
+                    <option value="Health care">Health care</option>
+                    <option value="Hospitality">Hospitality</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Media and news">Media and news</option>
+                    <option value="Mining">Mining</option>
+                    <option value="Pharmaceutical">Pharmaceutical</option>
+                    <option value="Telecommunication">Telecommunication</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Other industries">Other industries</option>
+                  </select>
+                </div>
+                <div class="icon is-small is-left">
+                  <i class="fas fa-archway"></i>
+                </div>
+              </VControl>
+            </VField>
+          </div>
+        </div>
       </template>
       <template #action>
-        <VButton @click="userEditModal = false" raised>Confirm</VButton>
+        <VButton @click="userEdit" raised>Confirm</VButton>
       </template>
     </VModal>
     <VModal
@@ -85,11 +387,12 @@ onMounted(() => {
     >
       <template #content>
         <VPlaceholderSection
-          title="Are you sure you want to Approve the teacher?"
+          title="Are you sure you want to Activate the teacher?"
         />
       </template>
+
       <template #action>
-        <VButton @click="deactivateUser()" raised>Confirm</VButton>
+        <VButton @click="activateUser()" raised>Confirm</VButton>
       </template>
     </VModal>
     <div class="columns">
@@ -108,6 +411,9 @@ onMounted(() => {
                 />
               </div>
             </div>
+            <VButtons class="m-t-20">
+              <VButton @click="userAddModal = true"> Add Teacher </VButton>
+            </VButtons>
           </div>
         </div>
       </div>
@@ -129,27 +435,27 @@ onMounted(() => {
       class="m-b-10"
     >
       <div>
-        <p>Student Name: {{ item.name }}</p>
+        <p>Teacher Name: {{ item.name }}</p>
         <p>Email: {{ item.email }}</p>
         <p>Course Name: {{ item.course }}</p>
         <p>Department Name: {{ item.department }}</p>
       </div>
       <VButtons>
         <VButton
-          @click="makeReadyForUpdateStatusActive(item, index)"
+          @click="makeReadyForUpdateStatusActive(item)"
           color="info"
           v-if="item.status == 'Pending'"
         >
           Approve
         </VButton>
         <VButton
-          @click="makeReadyForUpdateStatusDeactive(item, index)"
+          @click="makeReadyForUpdateStatusDeactive(item)"
           color="danger"
           v-if="item.status == 'Approved'"
         >
           Deactivate
         </VButton>
-        <VButton @click="userEditModal = true" color="primary"> Edit </VButton>
+        <VButton @click="copyUserData(item)" color="primary"> Edit </VButton>
       </VButtons>
     </VCard>
   </div>

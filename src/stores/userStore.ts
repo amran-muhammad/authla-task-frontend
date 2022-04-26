@@ -39,6 +39,27 @@ export const useUserStore = defineStore('userStore', () => {
     studentID: '',
     status: 'Pending',
   })
+  const form_data = ref({
+    name: '',
+    email: '',
+    type: '',
+    password: '',
+    department: '',
+    course: '',
+    studentID: '',
+    status: 'Pending',
+  })
+
+  const edit_data = ref({
+    _id: '',
+    name: '',
+    email: '',
+    type: '',
+    department: '',
+    course: '',
+    studentID: '',
+    status: '',
+  })
   function setStep(value: number) {
     step.value = value
     router.push({
@@ -52,6 +73,32 @@ export const useUserStore = defineStore('userStore', () => {
       const res: any = await common.postApi('users/add', userData.value)
       if (res.status == 200) {
         notyf.success('Registration successful!')
+      }
+    } catch (error) {
+      notyf.error('Server Error! Try again')
+    }
+  }
+  async function addUser() {
+    try {
+      const res: any = await common.postApi('users/add', form_data.value)
+      if (res.status == 200) {
+        notyf.success('Registration successful!')
+      }
+    } catch (error) {
+      notyf.error('Server Error! Try again')
+    }
+  }
+
+  async function updateUser() {
+    try {
+      const res: any = await common.putApi(
+        `users/requests/update/${edit_data.value._id}`,
+        edit_data.value
+      )
+      if (res.status == 200) {
+        notyf.success('Updated!')
+      } else {
+        notyf.error('Already added')
       }
     } catch (error) {
       notyf.error('Server Error! Try again')
@@ -88,19 +135,49 @@ export const useUserStore = defineStore('userStore', () => {
     })
   }
 
-  async function statusUpdateOfUserActive(id: String) {
-    const res: any = await common.putApi(`users/requests/update/${id}`, {
-      status: 'Approved',
-    })
+  async function statusUpdateOfUserActiveTeacher(id: String, i: number) {
+    const res: any = await common.putApi(
+      `users/requests/update/teacher/${id}`,
+      {
+        status: 'Approved',
+      }
+    )
 
     if (res.data == 200) {
       notyf.success('Status Changed')
     }
   }
-  async function statusUpdateOfUserDeactive(id: String) {
-    const res: any = await common.putApi(`users/requests/update/${id}`, {
-      status: 'Pending',
-    })
+  async function statusUpdateOfUserDeactiveTeacher(id: String, i: number) {
+    const res: any = await common.putApi(
+      `users/requests/update/teacher/${id}`,
+      {
+        status: 'Pending',
+      }
+    )
+
+    if (res.data == 200) {
+      notyf.success('Status Changed')
+    }
+  }
+  async function statusUpdateOfUserActiveStudent(id: String, i: number) {
+    const res: any = await common.putApi(
+      `users/requests/update/student/${id}`,
+      {
+        status: 'Approved',
+      }
+    )
+
+    if (res.data == 200) {
+      notyf.success('Status Changed')
+    }
+  }
+  async function statusUpdateOfUserDeactiveStudent(id: String, i: number) {
+    const res: any = await common.putApi(
+      `users/requests/update/student/${id}`,
+      {
+        status: 'Pending',
+      }
+    )
 
     if (res.data == 200) {
       notyf.success('Status Changed')
@@ -114,12 +191,18 @@ export const useUserStore = defineStore('userStore', () => {
     stepTitle,
     teacher,
     student,
-    statusUpdateOfUserDeactive,
-    statusUpdateOfUserActive,
+    form_data,
+    edit_data,
+    addUser,
+    statusUpdateOfUserDeactiveTeacher,
+    statusUpdateOfUserDeactiveStudent,
+    statusUpdateOfUserActiveTeacher,
+    statusUpdateOfUserActiveStudent,
     getAllTeacher,
     getAllStudent,
     register,
     setStep,
     selectUserType,
+    updateUser,
   } as const
 })

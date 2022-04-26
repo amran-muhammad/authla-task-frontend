@@ -148,7 +148,9 @@ const handleLogin = async () => {
         isLoading.value = false
         notif.success('Welcome back, ' + userStore.userData.name)
         if (redirect) {
-          router.push(redirect)
+          router.push({
+            name: 'dashboard',
+          })
         } else {
           isLoading.value = false
           router.push({

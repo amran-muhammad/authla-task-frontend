@@ -18,7 +18,7 @@ export const useUserSession = defineStore('userSession', () => {
   const placeloader_contact = ref(false)
   const company: any = useCompany()
   const dataList = ref([])
-  const pages:any = ref([])
+  const pages: any = ref([])
   const but_page = ref(1)
   const but_endpage = ref(1)
   const searchkey = ref('')
@@ -49,13 +49,10 @@ export const useUserSession = defineStore('userSession', () => {
   async function get() {
     placeloader_contact.value = true
     try {
-      const res: any = await common.getApi(
-        'read/contact-message',
-        {
-          page: 1,
-          searchkey: searchkey.value,
-        }
-      )
+      const res: any = await common.getApi('read/contact-message', {
+        page: 1,
+        searchkey: searchkey.value,
+      })
       if (res.status == 200) placeloader_contact.value = false
       dataList.value = res.data.data
       but_endpage.value = Math.ceil(res.data.total / 20)
@@ -70,12 +67,9 @@ export const useUserSession = defineStore('userSession', () => {
   }
   async function pageChange(page: number) {
     but_page.value = page
-    const res: any = await common.getApi(
-      'read/contact-message',
-      {
-        page
-      }
-    )
+    const res: any = await common.getApi('read/contact-message', {
+      page,
+    })
     dataList.value = res.data.data
     pages.value = []
     for (let i = page - 1; i < Math.ceil(res.data.total / 20); i++) {
@@ -84,14 +78,13 @@ export const useUserSession = defineStore('userSession', () => {
     }
   }
 
-  async function getChartData(token:any) {
+  async function getChartData(token: any) {
     const headers: any = {
       Authorization: 'Bearer ' + token,
     }
-    const dashboard: any = await axios.get(
-      host + '/api/dashboard',
-      { headers: headers }
-    )
+    const dashboard: any = await axios.get(host + '/api/dashboard', {
+      headers: headers,
+    })
     if (dashboard.status == 200) {
       ;(days.value = dashboard.data.days),
         (applications.value = dashboard.data.applications)
@@ -102,16 +95,17 @@ export const useUserSession = defineStore('userSession', () => {
     const headers: any = {
       Authorization: 'Bearer ' + token,
     }
-    const res_user: any = await axios.get(
-      host + '/users/get-user-by-token',
-      { headers: headers }
-    )
+    const res_user: any = await axios.get(host + '/users/get-user-by-token', {
+      headers: headers,
+    })
     if (res_user.status == 200) {
       userStore.userData.id = res_user.data.user._id
       userStore.userData.email = res_user.data.user.email
       userStore.userData.name = res_user.data.user.name
       userStore.userData.type = res_user.data.user.type
       userStore.userData.studentID = res_user.data.user.studentID
+      userStore.userData.department = res_user.data.user.department
+      userStore.userData.course = res_user.data.user.course
       return true
     } else {
       notyf.error(res_user.data.msg)
@@ -124,11 +118,9 @@ export const useUserSession = defineStore('userSession', () => {
       Authorization: 'Bearer ' + token.value,
     }
     try {
-      const res_com:any = await common.postApi(
-        'api/company/v1/update',
-        { data: company.data }
-        
-      )
+      const res_com: any = await common.postApi('api/company/v1/update', {
+        data: company.data,
+      })
       if (res_com.status == 200) {
         return true
       } else {
@@ -143,10 +135,10 @@ export const useUserSession = defineStore('userSession', () => {
       Authorization: 'Bearer ' + token.value,
     }
     try {
-      const res_com:any = await common.postApi(
-        'api/password-change-setting',
-        { ...data, email: company.data.email }
-      )
+      const res_com: any = await common.postApi('api/password-change-setting', {
+        ...data,
+        email: company.data.email,
+      })
       if (res_com.status == 200) {
         return res_com
       } else {

@@ -41,22 +41,11 @@ const userStore = useUserStore()
 
                 <div class="account-menu">
                   <RouterLink
-                    :to="{ name: 'company-profile-edit' }"
+                    :to="{ name: 'profile-edit' }"
                     class="account-menu-item"
                   >
                     <i aria-hidden="true" class="lnil lnil-user-alt"></i>
                     <span>Personal</span>
-                    <span class="end">
-                      <i aria-hidden="true" class="fas fa-arrow-right"></i>
-                    </span>
-                  </RouterLink>
-
-                  <RouterLink
-                    :to="{ name: 'company-profile-edit-settings' }"
-                    class="account-menu-item"
-                  >
-                    <i aria-hidden="true" class="lnil lnil-cog"></i>
-                    <span>Settings</span>
                     <span class="end">
                       <i aria-hidden="true" class="fas fa-arrow-right"></i>
                     </span>

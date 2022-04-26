@@ -18,7 +18,7 @@ const userStore = useUserStore()
       </div>
 
       <router-link
-        :to="{ name: 'company-profile-edit' }"
+        :to="{ name: 'profile-edit' }"
         role="menuitem"
         class="dropdown-item is-media"
       >

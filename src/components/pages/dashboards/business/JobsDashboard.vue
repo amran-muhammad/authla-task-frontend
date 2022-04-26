@@ -22,36 +22,35 @@ moment.updateLocale('en', {
 
 const router = useRouter()
 
-// Get initials from name
-// const filter = (status: string) => {
-//   job_application.filters.status = status
-//   job_application.get()
-// }
-
-let itemOfCard: any = ref({})
-// const assignDetailsOfPositionCard = (job_title: any) => {
-//   let index: number = job_application.job_categories.findIndex(
-//     (x: any) => x.job_title == job_title
-//   )
-//   job_application.get_job_status_statistics_according_to_job(
-//     job_application.job_categories[index].id
-//   )
-
-//   itemOfCard.value = job_application.job_categories[index]
-//   if (itemOfCard.value.created_at) {
-//     itemOfCard.value.created_at = itemOfCard.value.created_at
-//       .substring(0, 10)
-//       .split('-')
-//     itemOfCard.value.created_at =
-//       itemOfCard.value.created_at[2] +
-//       '/' +
-//       itemOfCard.value.created_at[1] +
-//       '/' +
-//       itemOfCard.value.created_at[0]
-//   }
-//   job_application.get()
-// }
-
+function updateStatusForBooking() {
+  if (scheduleStore.appointmentDate == '') {
+    return notyf.error('Please provide an appointment date')
+  }
+  if (scheduleStore.appointmentDate) {
+    let dayname = moment(scheduleStore.appointmentDate).format('dddd')
+    if (scheduleStore.dayMust != '' && scheduleStore.dayMust != dayname) {
+      return notyf.error(
+        'Please provide an appointment date on ' + scheduleStore.dayMust
+      )
+    }
+  }
+  scheduleStore.statusUpdateOfBooking().then(() => {
+    scheduleStore.getAllCommonBookings()
+    scheduleStore.makeFalseViewModal()
+  })
+}
+function updateStatusForBookingReject() {
+  scheduleStore.statusUpdateOfBookingRejected().then(() => {
+    scheduleStore.getAllCommonBookings()
+    scheduleStore.makeFalseRejectedModal()
+  })
+}
+function deleteBooking() {
+  scheduleStore.deleteOfBooking().then(() => {
+    scheduleStore.makeFalseBookingDeleteModal()
+    scheduleStore.getAllCommonBookings()
+  })
+}
 onMounted(() => {
   scheduleStore.getAllCommonBookings()
 })
@@ -69,13 +68,11 @@ onMounted(() => {
     >
       <template #content>
         <VPlaceholderSection
-          title="Are you sure you want to Delete the  the application?"
+          title="Are you sure you want to Delete the booking?"
         />
       </template>
       <template #action>
-        <VButton @click="scheduleStore.deleteOfBooking()" raised
-          >Confirm</VButton
-        >
+        <VButton @click="deleteBooking()" raised>Confirm</VButton>
       </template>
     </VModal>
     <!-- delete job application modal start -->
@@ -88,11 +85,44 @@ onMounted(() => {
     >
       <template #content>
         <VPlaceholderSection
-          title="Are you sure you want to Accept the  the application?"
+          title="Are you sure you want to Accept the booking?"
+        />
+        <!--Field-->
+
+        <VField>
+          <label
+            >Please provide the appointmet date on
+            {{ scheduleStore.dayMust }}</label
+          >
+          <VControl>
+            <input
+              v-model="scheduleStore.appointmentDate"
+              type="date"
+              class="input"
+              placeholder="Appointment Date"
+              autocomplete="family-name"
+            />
+          </VControl>
+        </VField>
+      </template>
+      <template #action>
+        <VButton @click="updateStatusForBooking()" raised>Confirm</VButton>
+      </template>
+    </VModal>
+    <VModal
+      :open="scheduleStore.bookingViewRejectedModal"
+      size="small"
+      actions="center"
+      noclose
+      @close="scheduleStore.bookingViewRejectedModal = false"
+    >
+      <template #content>
+        <VPlaceholderSection
+          title="Are you sure you want to Reject the booking?"
         />
       </template>
       <template #action>
-        <VButton @click="scheduleStore.statusUpdateOfBooking()" raised
+        <VButton @click="updateStatusForBookingReject()" raised
           >Confirm</VButton
         >
       </template>
@@ -100,320 +130,157 @@ onMounted(() => {
     <!-- delete job application modal end -->
     <!--Dashboard content -->
     <div class="main-container">
-      <!--Left Alert -->
-      <div class="search-type">
-        <VCard class="m-b-30 p-b-30 p-t-30">
-          <div class="title is-6 m-b-5">Filter job applications</div>
-          <p class="m-b-20">
-            <small>
-              Filter by status, job position, candidate's email or name
-            </small>
-          </p>
-          <VField>
-            <VControl class="has-icons-left">
-              <div class="select">
-                <!-- <select
-                  v-model="job_application.filters.status"
-                  @change="
-                    assignDetailsOfPositionCard(
-                      job_application.filters.job_position
-                    )
-                  "
-                >
-                  <option value="">Select a status</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Interviewed">Interviewed</option>
-                  <option value="Shortlisted">Shortlisted</option>
-                  <option value="Hired">Hired</option>
-                  <option value="Offered">Offered</option>
-                  <option value="Rejected">Rejected</option>
-                </select> -->
-              </div>
-              <div class="icon is-small is-left">
-                <i class="iconify" data-icon="feather:sliders"></i>
-              </div>
-            </VControl>
-          </VField>
+      <VCard class="m-h-1000">
+        <div class="illustration-header"></div>
+        <div class="flex-table">
+          <div
+            class="flex-table-header"
+            :class="[scheduleStore.bookings.length === 0 && 'is-hidden']"
+          >
+            <span class="">Teacher</span>
+            <span class="">Course</span>
+            <span class="">Agenda</span>
+            <span>Student</span>
+            <span>Day</span>
+            <span>From</span>
 
-          <VField>
-            <VControl class="has-icons-left">
-              <div class="select">
-                <!-- <select
-                  v-model="job_application.filters.job_position"
-                  @change="
-                    assignDetailsOfPositionCard(
-                      job_application.filters.job_position
-                    )
-                  "
-                >
-                  <option value="">Select a position</option>
+            <span>To</span>
 
-                  <option
-                    v-for="(item, index) in job_application.job_categories"
-                    :key="index"
-                    :value="item.job_title"
-                  >
-                    {{ item.job_title }}
-                  </option>
-                </select> -->
-              </div>
-              <div class="icon is-small is-left">
-                <i class="iconify" data-icon="feather:briefcase"></i>
-              </div>
-            </VControl>
-          </VField>
+            <span>Applied</span>
+            <span>Appointment Date</span>
 
-          <VField>
-            <VControl class="has-icons-left">
-              <div class="select">
-                <!-- <select
-                  v-model="job_application.filters.country"
-                  @change="job_application.get()"
-                >
-                  <option value="" selected>Select a country</option>
+            <span>Status</span>
 
-                  <option
-                    v-for="(item, index) in allcountries"
-                    :key="index"
-                    :value="item.name"
-                  >
-                    {{ item.name }}
-                  </option>
-                </select> -->
-              </div>
-              <div class="icon is-small is-left">
-                <i class="iconify" data-icon="feather:globe"></i>
-              </div>
-            </VControl>
-          </VField>
-
-          <VField class="m-t-25 m-b-5">
-            <VControl icon="feather:search">
-              <!-- <input
-                v-model="job_application.filters.searchkey"
-                type="text"
-                class="input"
-                placeholder="Candidate's name or email"
-                @keyup.enter="job_application.get()"
-              /> -->
-            </VControl>
-          </VField>
-          <small class="search-info"><p>Press enter to search</p></small>
-        </VCard>
-        <!-- {{ job_application.filters }} -->
-
-        <!-- <VCard
-          v-if="job_application.filters.job_position"
-          class="m-b-30 p-b-30 p-t-20 job-card"
-        >
-          <div class="">
-            <img
-              src="/@src/assets/illustrations/expired.png"
-              alt="Expired Job"
-            />
-
-            <h3 class="title title-job m-b-10 title is-5">
-              {{ job_application.filters.job_position }}
-            </h3>
-            <p class="title title-job m-b-30 title is-6">
-              Applications
-              {{ job_application.stats ? job_application.stats.All : 0 }}
-            </p>
-            <VButton
-              class="m-t-20"
-              color="primary"
-              bold
-              icon="feather:edit"
-              fullwidth
-              @click="
-                open(
-                  job_application.job_categories[
-                    job_application.job_categories.findIndex(
-                      (x) => x.job_title == job_application.filters.job_position
-                    )
-                  ]
-                )
-              "
-              >Edit Opening</VButton
-            >
-            <VButton
-              fullwidth
-              bold
-              class="m-t-10"
-              icon="feather:copy"
-              >Copy Sharing Link</VButton
-            >
-            <small
-              ><p class="m-t-30">
-                Click <b>Edit Opening</b> to edit application sharing options
-              </p></small
-            >
+            <span class="cell-end">Actions</span>
           </div>
-        </VCard> -->
-      </div>
+          <div class="flex-list-inner">
+            <transition-group name="list" tag="div">
+              <div
+                v-for="(item, index) in scheduleStore.bookings"
+                :key="index"
+                class="flex-table-item"
+              >
+                <div class="flex-table-cell is-media">
+                  <div>
+                    <span class="item-name dark-inverted dots-name"
+                      >{{ item.userDetails[0].name }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex-table-cell is-media">
+                  <div>
+                    <span class="item-name dark-inverted dots-name"
+                      >{{ item.userDetails[0].course }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex-table-cell is-media">
+                  <div>
+                    <span class="item-name dark-inverted dots-name"
+                      >{{ item.agenda }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex-table-cell is-media">
+                  <div>
+                    <span class="item-name dark-inverted dots-name"
+                      >{{
+                        userStore.userData.type == 'student'
+                          ? userStore.userData.name
+                          : item.studentDetails[0].name
+                      }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex-table-cell is-media">
+                  <div v-if="item.scheduleDetails.length > 0">
+                    <span class="item-name dark-inverted dots-name">
+                      {{ item.scheduleDetails[0].day }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex-table-cell is-media">
+                  <div v-if="item.scheduleDetails.length > 0">
+                    <span class="item-name dark-inverted dots-name">
+                      {{
+                        item.scheduleDetails[0].start_time < 12
+                          ? item.scheduleDetails[0].start_time + ' AM'
+                          : (item.scheduleDetails[0].start_time - 12 == 0
+                              ? 12
+                              : item.scheduleDetails[0].start_time - 12) + ' PM'
+                      }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex-table-cell is-media">
+                  <div v-if="item.scheduleDetails.length > 0">
+                    <span class="item-name dark-inverted dots-name">
+                      {{
+                        item.scheduleDetails[0].end_time < 12
+                          ? item.scheduleDetails[0].end_time + ' AM'
+                          : (item.scheduleDetails[0].end_time - 12 == 0
+                              ? 12
+                              : item.scheduleDetails[0].end_time - 12) + ' PM'
+                      }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex-table-cell" data-th="Date">
+                  <small
+                    class="light-text text-center"
+                    v-tooltip="
+                      'Applied on ' +
+                      moment(item.time).format('DD/MM/YYYY [at] LT')
+                    "
+                  >
+                    {{ moment(item.time).fromNow(false) }}
+                  </small>
+                </div>
+                <div class="flex-table-cell" data-th="Date">
+                  <small class="light-text text-center">
+                    {{ item.appointment ? item.appointment : 'N/A' }}
+                  </small>
+                </div>
 
-      <!--Results-->
-      <div class="searched-jobs">
-        <!--Results toolbar-->
+                <div class="flex-table-cell" data-th="Status">
+                  <span v-if="item.status === 'Pending'" class="tag">{{
+                    item.status
+                  }}</span>
 
-        <!--Results content-->
-        <div class="page-content-inner">
-          <div class="flex-list-wrapper flex-list-v1">
-            <VCard class="p-b-60">
-              <div class="illustration-header"></div>
-              <div class="flex-table">
+                  <span
+                    v-else-if="item.status === 'Approved'"
+                    class="tag is-primary"
+                    >{{ item.status }}</span
+                  >
+                  <span
+                    v-else-if="item.status === 'Rejected'"
+                    class="tag is-danger"
+                    >{{ item.status }}</span
+                  >
+                </div>
+
                 <div
-                  class="flex-table-header"
-                  :class="[scheduleStore.bookings.length === 0 && 'is-hidden']"
+                  @click="scheduleStore.setBookinData(item)"
+                  class="flex-table-cell cell-end"
+                  data-th="Actions"
                 >
-                  <span class="">Teacher</span>
-                  <span>Student</span>
-                  <span>From</span>
-
-                  <span>To</span>
-
-                  <span>Applied</span>
-
-                  <span>Status</span>
-
-                  <span class="cell-end">Actions</span>
-                </div>
-                <div class="flex-list-inner">
-                  <transition-group name="list" tag="div">
-                    <div
-                      v-for="(item, index) in scheduleStore.bookings"
-                      :key="index"
-                      class="flex-table-item"
-                    >
-                      <div class="flex-table-cell is-media">
-                        <div>
-                          <span class="item-name dark-inverted dots-name"
-                            >{{ item.userDetails[0].name }}
-                          </span>
-                        </div>
-                      </div>
-                      <div class="flex-table-cell is-media">
-                        <div>
-                          <span class="item-name dark-inverted dots-name"
-                            >{{
-                              userStore.userData.type == 'student'
-                                ? userStore.userData.name
-                                : item.studentDetails[0].name
-                            }}
-                          </span>
-                        </div>
-                      </div>
-                      <div class="flex-table-cell is-media">
-                        <div>
-                          <span class="item-name dark-inverted dots-name">
-                            {{
-                              item.scheduleDetails[0].start_time < 12
-                                ? item.scheduleDetails[0].start_time + ' AM'
-                                : (item.scheduleDetails[0].start_time - 12 == 0
-                                    ? 12
-                                    : item.scheduleDetails[0].start_time - 12) +
-                                  ' PM'
-                            }}
-                          </span>
-                        </div>
-                      </div>
-                      <div class="flex-table-cell is-media">
-                        <div>
-                          <span class="item-name dark-inverted dots-name">
-                            {{
-                              item.scheduleDetails[0].end_time < 12
-                                ? item.scheduleDetails[0].end_time + ' AM'
-                                : (item.scheduleDetails[0].end_time - 12 == 0
-                                    ? 12
-                                    : item.scheduleDetails[0].end_time - 12) +
-                                  ' PM'
-                            }}
-                          </span>
-                        </div>
-                      </div>
-                      <div class="flex-table-cell" data-th="Date">
-                        <small
-                          class="light-text text-center"
-                          v-tooltip="
-                            'Applied on ' +
-                            moment(item.time).format('DD/MM/YYYY [at] LT')
-                          "
-                        >
-                          {{ moment(item.time).fromNow(false) }}
-                        </small>
-                      </div>
-
-                      <div class="flex-table-cell" data-th="Status">
-                        <span v-if="item.status === 'Pending'" class="tag">{{
-                          item.status
-                        }}</span>
-
-                        <span
-                          v-else-if="item.status === 'Approved'"
-                          class="tag is-primary"
-                          >{{ item.status }}</span
-                        >
-                      </div>
-
-                      <div
-                        @click="scheduleStore.setBookinData(item, index)"
-                        class="flex-table-cell cell-end"
-                        data-th="Actions"
-                      >
-                        <FlexTableDropdown />
-                      </div>
-                    </div>
-                  </transition-group>
+                  <FlexTableDropdown />
                 </div>
               </div>
-
-              <!-- <div
-                v-if="
-                  job_application.dataList.length > 0 &&
-                  job_application.total > 10
-                "
-              >
-                <VFlexPagination
-                  :item-per-page="job_application.perPage"
-                  :total-items="job_application.total"
-                  :current-page="job_application.currentPage"
-                  :max-links-displayed="job_application.maxPage"
-                />
-              </div>
-              <VPlaceholderPage
-                v-if="
-                  job_application.placeloader &&
-                  job_application.dataList.length == 0
-                "
-                title="No job applications is been applied yet"
-                subtitle="Too bad. Looks like we couldn't find any matching results for the
-                  search terms you've entered. Please try different search terms or
-                  criteria."
-                larger
-              >
-                <template #image>
-                  <img
-                    class="light-image"
-                    src="/@src/assets/illustrations/placeholders/search-4.svg"
-                    alt=""
-                  />
-                  <img
-                    class="dark-image"
-                    src="/@src/assets/illustrations/placeholders/search-4-dark.svg"
-                    alt=""
-                  />
-                </template>
-              </VPlaceholderPage> -->
-            </VCard>
+            </transition-group>
           </div>
         </div>
-      </div>
+        <span v-if="scheduleStore.bookings.length == 0"> No Data </span>
+      </VCard>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 @import '../../../../scss/abstracts/_mixins.scss';
+.m-h-1000 {
+  min-height: 1000px;
+}
 .tag-wide {
   width: 100%;
   text-align: center;

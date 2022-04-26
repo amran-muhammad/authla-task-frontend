@@ -27,7 +27,7 @@ const setStep = (target: number) => {
   }
 }
 const goToCompanyEdit = () => {
-  router.push('/company-profile-edit')
+  router.push('/profile-edit')
 }
 const goToCompanyView = () => {
   router.push('/sidebar/layouts/profile-view')

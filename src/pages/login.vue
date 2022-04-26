@@ -8,7 +8,6 @@ import { useUserSession } from '/@src/stores/userSession'
 import useNotyf from '/@src/composable/useNotyf'
 import sleep from '/@src/utils/sleep'
 import axios from 'axios'
-import { useCompany } from '/@src/stores/company'
 import { useUserStore } from '../stores/userStore'
 const host = import.meta.env.VITE_API_BASE_URL
 
@@ -20,7 +19,6 @@ const route = useRoute()
 const notif = useNotyf()
 const userSession = useUserSession()
 const redirect = route.query.redirect as string
-const company: any = useCompany()
 const userStore: any = useUserStore()
 const form_data = {
   email: '',

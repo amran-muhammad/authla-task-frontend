@@ -16,13 +16,12 @@ const dropdown1 = useDropdown(dropdownElement1)
 const dropdownElement2 = ref<HTMLElement>()
 const dropdown2 = useDropdown(dropdownElement2)
 
-const company = useCompany()
 const router = useRouter()
 const user = useUserSession()
 const userStore = useUserStore()
 const setStep = (target: number) => {
-  if (company.step >= target) {
-    company.setStep(target)
+  if (userStore.step >= target) {
+    userStore.setStep(target)
     dropdown1.close()
   }
 }
@@ -64,28 +63,28 @@ const goToCompanyView = () => {
       <div id="wizard-navigation-dropdown" class="dropdown-menu" role="menu">
         <div class="dropdown-content">
           <a
-            :class="[company.step < 1 && 'is-disabled']"
+            :class="[userStore.step < 1 && 'is-disabled']"
             class="dropdown-item kill-drop"
             @click="setStep(1)"
           >
-            Step 1: {{ company.stepTitle }}
+            Step 1: {{ userStore.stepTitle }}
           </a>
           <a
-            :class="[company.step < 2 && 'is-disabled']"
+            :class="[userStore.step < 2 && 'is-disabled']"
             class="dropdown-item kill-drop"
             @click="setStep(2)"
           >
             Step 2: Company Info
           </a>
           <a
-            :class="[company.step < 3 && 'is-disabled']"
+            :class="[userStore.step < 3 && 'is-disabled']"
             class="dropdown-item kill-drop"
             @click="setStep(3)"
           >
             Step 3: Company Details
           </a>
           <a
-            :class="[company.step < 4 && 'is-disabled']"
+            :class="[userStore.step < 4 && 'is-disabled']"
             class="dropdown-item kill-drop"
             @click="setStep(5)"
           >

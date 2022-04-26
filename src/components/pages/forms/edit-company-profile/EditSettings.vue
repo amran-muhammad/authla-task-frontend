@@ -3,25 +3,11 @@ import { useWindowScroll } from '@vueuse/core'
 import { computed, ref } from 'vue'
 import useNotyf from '/@src/composable/useNotyf'
 import sleep from '/@src/utils/sleep'
-import { useUserSession } from '/@src/stores/userSession'
-import { useCompany } from '/@src/stores/company'
 
-const company = useCompany()
-const userSession = useUserSession()
 const notyf = useNotyf()
 const { y } = useWindowScroll()
 
 const isLoading = ref(false)
-const error_old_password = ref(false)
-const error_new_password = ref(false)
-const error_retype_new_password = ref(false)
-const error_retype_new_password_unmatch = ref(false)
-const twoFactor = ref(true)
-let errorMessage = ref('')
-const notifications = ref(false)
-const notificationsLow = ref(false)
-const marketing = ref(false)
-const partners = ref(false)
 
 const isScrolling = computed(() => {
   return y.value > 30
@@ -46,95 +32,6 @@ function changeTypeOfNewPassword() {
 
 const onSave = async () => {
   isLoading.value = true
-  if (company.password_data.old_password) {
-    // old password start
-    if (company.password_data.old_password == '') {
-      error_old_password.value = true
-      isLoading.value = false
-      errorMessage.value = 'Old password is required!'
-      return
-    } else if (company.password_data.old_password.length < 8) {
-      error_old_password.value = true
-      isLoading.value = false
-      errorMessage.value = 'Password must have 8 characters!'
-      return
-    } else {
-      error_old_password.value = false
-    }
-    // old password end
-
-    // new password start
-    if (company.password_data.new_password == '') {
-      error_new_password.value = true
-      isLoading.value = false
-      errorMessage.value = 'New password is required!'
-      return
-    } else if (company.password_data.new_password.length < 8) {
-      error_new_password.value = true
-      isLoading.value = false
-      errorMessage.value = 'Password must have 8 characters!'
-      return
-    } else {
-      error_new_password.value = false
-    }
-    // new password end
-
-    // new retype password start
-    if (retype_new_password.value == '') {
-      isLoading.value = false
-      error_retype_new_password.value = true
-      errorMessage.value = 'Please enter new password again!'
-      return
-    } else if (retype_new_password.value.length < 8) {
-      error_retype_new_password.value = true
-      isLoading.value = false
-      errorMessage.value = 'Password must have 8 characters!'
-      return
-    } else {
-      error_retype_new_password.value = false
-    }
-    // new retype password end
-
-    // matching passwords start
-    if (retype_new_password.value != company.password_data.new_password) {
-      isLoading.value = false
-      error_retype_new_password_unmatch.value = true
-      errorMessage.value = 'Password does not match!'
-      return
-    } else {
-      error_retype_new_password_unmatch.value = false
-    }
-    // matching passwords end
-
-    await userSession
-      .updatePassword(company.password_data)
-      .then((data: any) => {
-        if (data.data.success == true) {
-          isLoading.value = false
-          retype_new_password.value = ''
-          company.resetPasswordData()
-          return notyf.success(data.data.msg)
-        } else {
-          isLoading.value = false
-          if (data.data.key == 'oldpassword') {
-            error_old_password.value = true
-            errorMessage.value = data.data.msg
-          } else if (data.data.key == 'password') {
-            error_new_password.value = true
-            errorMessage.value = data.data.msg
-          } else {
-            return notyf.error(data.data.msg)
-          }
-        }
-      })
-  }
-  let result = await userSession.updateProfile()
-  if (result == true) {
-    notyf.success('Your changes have been successfully saved!')
-  } else {
-    notyf.error('Sorry, update process is failed!')
-  }
-  // notyf.success('Your changes have been successfully saved!')
   isLoading.value = false
 }
 </script>

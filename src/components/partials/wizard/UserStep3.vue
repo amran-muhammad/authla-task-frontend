@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import { useCompany } from '/@src/stores/company'
 import { useUserStore } from '/@src/stores/userStore'
 import { useCountries } from '/@src/assets/countries.json'
 import { useI18n } from 'vue-i18n'
@@ -9,7 +8,7 @@ import { Form, Field } from 'vee-validate'
 import * as yup from 'yup'
 
 const search = ref('')
-const company = useCompany()
+
 const userStore = useUserStore()
 
 const { t } = useI18n()
@@ -37,7 +36,7 @@ let checked = false
   <div class="step-content">
     <div class="step-title">
       <h2 class="dark-inverted">Add more details</h2>
-      <p>Tell us about your company more you'd like us to know</p>
+      <p>Tell us about you more you'd like us to know</p>
     </div>
 
     <div class="project-info">

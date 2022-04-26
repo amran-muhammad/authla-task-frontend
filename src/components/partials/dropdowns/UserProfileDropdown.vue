@@ -3,7 +3,6 @@ import { useCompany } from '/@src/stores/company'
 import { useUserSession } from '/@src/stores/userSession'
 import { useUserStore } from '/@src/stores/userStore'
 const host = import.meta.env.VITE_API_BASE_URL
-const company = useCompany()
 const user = useUserSession()
 const userStore = useUserStore()
 </script>
